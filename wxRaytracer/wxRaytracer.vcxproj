@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName />
+    <SccLocalPath />
+    <ProjectGuid>{D1847BC3-2858-4546-8255-381D75FA08E3}</ProjectGuid>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;__WIN32__;__WXMSW__;WINVER=0x0400;STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Debug\wxRaytracer.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>Debug\wxRaytracer/</ObjectFileName>
+      <ProgramDataBaseFileName>Debug\wxRaytracer.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TypeLibraryName>.\Debug\wxRaytracer.tlb</TypeLibraryName>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>wxWidgets\msw;wxWidgets\include;.;wxWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;WXDEBUG=1;WIN32;__WIN32__;__WXMSW__;WINVER=0x0400;STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions> wxWidgets\include""</AdditionalOptions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug\wxRaytracer.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCD.lib;LIBCMTD.lib;LIBC.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <OutputFile>.\Debug\wxRaytracer.exe</OutputFile>
+      <AdditionalLibraryDirectories>wxwidgets\lib;wxWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;wxmsw28_core.lib;wxbase28.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalOptions> /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>MaxSpeed</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level4</WarningLevel>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Release\wxRaytracer.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>Release\wxRaytracer/</ObjectFileName>
+      <ProgramDataBaseFileName>Release\wxRaytracer.pdb</ProgramDataBaseFileName>
+      <AdditionalOptions> /EHsc </AdditionalOptions>
+    </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>WIN32;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\Release\wxRaytracer.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>wxWidgets\msw;wxWidgets\include;.;wxWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release\wxRaytracer.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>.\Release\wxRaytracer.exe</OutputFile>
+      <AdditionalLibraryDirectories>wxwidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxmsw28_core.lib;wxbase28.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="raytracer\BRDFs\BRDF.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\GlossySpecular.cpp" />
+    <ClCompile Include="raytracer\BRDFs\Lambertian.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\PerfectSpecular.cpp" />
+    <ClCompile Include="raytracer\BTDFs\BTDF.cpp" />
+    <ClCompile Include="raytracer\BTDFs\PerfectTransmitter.cpp" />
+    <ClCompile Include="raytracer\build\BuildShadedObjects.cpp" />
+    <ClCompile Include="raytracer\Cameras\Camera.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Cameras\FishEye.cpp" />
+    <ClCompile Include="raytracer\Cameras\Pinhole.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Cameras\ThinLens.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Box.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Compound.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\ConcaveSphere.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\ConvexPartCylinder.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\FlatMeshTriangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\GeometricObject.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\GeometricObjects\Grid.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Instance.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Mesh.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\MeshTriangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Plane.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\GeometricObjects\ply.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Rectangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\SmoothMeshTriangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\SmoothTriangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\SolidCylinder.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Sphere.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\GeometricObjects\Triangle.cpp" />
+    <ClCompile Include="raytracer\Lights\Ambient.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Lights\AmbientOccluder.cpp" />
+    <ClCompile Include="raytracer\Lights\AreaLight.cpp" />
+    <ClCompile Include="raytracer\Lights\Directional.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Lights\EnvironmentLight.cpp" />
+    <ClCompile Include="raytracer\Lights\Light.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Lights\PointLight.cpp" />
+    <ClCompile Include="raytracer\Materials\Emissive.cpp" />
+    <ClCompile Include="raytracer\Materials\GlossyReflector.cpp" />
+    <ClCompile Include="raytracer\Materials\Material.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\Matte.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\Phong.cpp" />
+    <ClCompile Include="raytracer\Materials\Reflective.cpp" />
+    <ClCompile Include="raytracer\Materials\Transparent.cpp" />
+    <ClCompile Include="raytracer\Samplers\Jittered.cpp" />
+    <ClCompile Include="raytracer\Samplers\MultiJittered.cpp" />
+    <ClCompile Include="raytracer\Samplers\NRooks.cpp" />
+    <ClCompile Include="raytracer\Samplers\Regular.cpp" />
+    <ClCompile Include="raytracer\Samplers\Sampler.cpp" />
+    <ClCompile Include="raytracer\Tracers\AreaLighting.cpp" />
+    <ClCompile Include="raytracer\Tracers\MultipleObjects.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Tracers\PathTrace.cpp" />
+    <ClCompile Include="raytracer\Tracers\RayCast.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Tracers\SingleSphere.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Tracers\Tracer.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Tracers\Whitted.cpp" />
+    <ClCompile Include="raytracer\UserInterface\wxraytracer.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\BBox.cpp" />
+    <ClCompile Include="raytracer\Utilities\Matrix.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\Normal.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\Point2D.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\Point3D.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\Ray.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\RGBColor.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\ShadeRec.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\Utilities\Vector3D.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\World\ViewPlane.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="raytracer\World\World.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="raytracer\BRDFs\BRDF.h" />
+    <ClInclude Include="raytracer\BRDFs\GlossySpecular.h" />
+    <ClInclude Include="raytracer\BRDFs\Lambertian.h" />
+    <ClInclude Include="raytracer\BRDFs\PerfectSpecular.h" />
+    <ClInclude Include="raytracer\BTDFs\BTDF.h" />
+    <ClInclude Include="raytracer\BTDFs\PerfectTransmitter.h" />
+    <ClInclude Include="raytracer\Cameras\Camera.h" />
+    <ClInclude Include="raytracer\Cameras\FishEye.h" />
+    <ClInclude Include="raytracer\Cameras\Pinhole.h" />
+    <ClInclude Include="raytracer\Cameras\ThinLens.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Box.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Compound.h" />
+    <ClInclude Include="raytracer\GeometricObjects\ConcaveSphere.h" />
+    <ClInclude Include="raytracer\GeometricObjects\ConvexPartCylinder.h" />
+    <ClInclude Include="raytracer\GeometricObjects\FlatMeshTriangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\GeometricObject.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Grid.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Instance.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Mesh.h" />
+    <ClInclude Include="raytracer\GeometricObjects\MeshTriangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Plane.h" />
+    <ClInclude Include="raytracer\GeometricObjects\ply.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Rectangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\SmoothMeshTriangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\SmoothTriangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\SolidCylinder.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Sphere.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Triangle.h" />
+    <ClInclude Include="raytracer\Lights\Ambient.h" />
+    <ClInclude Include="raytracer\Lights\AmbientOccluder.h" />
+    <ClInclude Include="raytracer\Lights\AreaLight.h" />
+    <ClInclude Include="raytracer\Lights\Directional.h" />
+    <ClInclude Include="raytracer\Lights\EnvironmentLight.h" />
+    <ClInclude Include="raytracer\Lights\Light.h" />
+    <ClInclude Include="raytracer\Lights\PointLight.h" />
+    <ClInclude Include="raytracer\Materials\Emissive.h" />
+    <ClInclude Include="raytracer\Materials\GlossyReflector.h" />
+    <ClInclude Include="raytracer\Materials\Material.h" />
+    <ClInclude Include="raytracer\Materials\Matte.h" />
+    <ClInclude Include="raytracer\Materials\Phong.h" />
+    <ClInclude Include="raytracer\Materials\Reflective.h" />
+    <ClInclude Include="raytracer\Materials\Transparent.h" />
+    <ClInclude Include="raytracer\Samplers\Jittered.h" />
+    <ClInclude Include="raytracer\Samplers\MultiJittered.h" />
+    <ClInclude Include="raytracer\Samplers\NRooks.h" />
+    <ClInclude Include="raytracer\Samplers\Regular.h" />
+    <ClInclude Include="raytracer\Samplers\Sampler.h" />
+    <ClInclude Include="raytracer\Tracers\AreaLighting.h" />
+    <ClInclude Include="raytracer\Tracers\MultipleObjects.h" />
+    <ClInclude Include="raytracer\Tracers\PathTrace.h" />
+    <ClInclude Include="raytracer\Tracers\RayCast.h" />
+    <ClInclude Include="raytracer\Tracers\SingleSphere.h" />
+    <ClInclude Include="raytracer\Tracers\Tracer.h" />
+    <ClInclude Include="raytracer\Tracers\Whitted.h" />
+    <ClInclude Include="raytracer\UserInterface\wxraytracer.h" />
+    <ClInclude Include="raytracer\Utilities\BBox.h" />
+    <ClInclude Include="raytracer\Utilities\Constants.h" />
+    <ClInclude Include="raytracer\Utilities\DebugPrint.h" />
+    <ClInclude Include="raytracer\Utilities\Maths.h" />
+    <ClInclude Include="raytracer\Utilities\Matrix.h" />
+    <ClInclude Include="raytracer\Utilities\Normal.h" />
+    <ClInclude Include="raytracer\Utilities\Point2D.h" />
+    <ClInclude Include="raytracer\Utilities\Point3D.h" />
+    <ClInclude Include="raytracer\Utilities\pre_define.h" />
+    <ClInclude Include="raytracer\Utilities\Ray.h" />
+    <ClInclude Include="raytracer\Utilities\RGBColor.h" />
+    <ClInclude Include="raytracer\Utilities\ShadeRec.h" />
+    <ClInclude Include="raytracer\Utilities\Vector3D.h" />
+    <ClInclude Include="raytracer\World\ViewPlane.h" />
+    <ClInclude Include="raytracer\World\World.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
