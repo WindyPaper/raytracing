@@ -13,8 +13,9 @@
 #include <wx/wx.h>
 #include "World.h"
 #include <vector>
+#include "ThreadLocalStorge.h"
 
-using namespace std;
+//using namespace std;
 
 
 class wxraytracerFrame;
@@ -100,6 +101,7 @@ private:
 class RenderPixel
 {
 public:
+	RenderPixel();
    RenderPixel(int x, int y, int red, int green, int blue);
 
 public:
@@ -130,6 +132,27 @@ private:
    vector<RenderPixel*> pixels;
    wxStopWatch* timer;
    long lastUpdateTime;
+};
+
+class WxDrawPixels
+{
+public:
+	WxDrawPixels(RenderCanvas *c, int width, int height);
+	~WxDrawPixels();
+
+	void setPixel(int x, int y, int red, int green, int blue);
+	void setPixels(const std::vector<RenderPixelData> &pixels);
+
+protected:
+	void NotifyCanvas();
+
+private:
+	int width, height;
+	RenderCanvas* canvas;
+
+	vector<RenderPixel> pixels;
+	wxStopWatch* timer;
+	long lastUpdateTime;
 };
 
 

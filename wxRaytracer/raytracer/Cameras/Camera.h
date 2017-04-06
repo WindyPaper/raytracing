@@ -8,6 +8,7 @@
 #include "Vector3D.h"
 
 class World;  // can't #include "World" here because World contains a camera pointer
+class RenderTLS;
 
 //--------------------------------------------------------------------- class Camera
 
@@ -26,6 +27,8 @@ class Camera {
 
 		virtual void 																		
 		render_scene(const World& w) = 0;
+
+		virtual void render_scene(RenderTLS *tls, const World &w, int offsetx, int offsety, int width, int height) {}
 		
 		void
 		set_eye(const Point3D& p);

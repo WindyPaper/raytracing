@@ -41,6 +41,8 @@
 //#include "BuildShadedObjects.cpp"
 #include "Sampler.h"
 
+#include "ThreadPool.h"
+
 
 // -------------------------------------------------------------------- default constructor
 
@@ -53,7 +55,9 @@ World::World(void)
 	:  	background_color(black),
 		tracer_ptr(NULL),
 		ambient_ptr(new Ambient),
-		camera_ptr(NULL)
+		camera_ptr(NULL),
+		paintArea(NULL),
+		threadPool(NULL)
 {
 	//Sphere*	sphere_ptr1 = new Sphere(Point3D(0, 0, 0), 30);
 	////sphere_ptr1->set_material(matte_ptr1);	
@@ -66,6 +70,8 @@ World::World(void)
 	//RGBColor yellow(1, 1, 0);
 	//sphere_ptr2->set_color(yellow);
 	//add_object(sphere_ptr2);
+
+	threadPool = new ThreadPool();
 }
 
 
@@ -89,6 +95,18 @@ World::~World(void) {
 	if (camera_ptr) {
 		delete camera_ptr;
 		camera_ptr = NULL;
+	}
+
+	if (threadPool)
+	{
+		delete threadPool;
+		threadPool = NULL;
+	}
+
+	if (paintArea)
+	{
+		delete paintArea;
+		paintArea = NULL;
 	}
 	
 	delete_objects();	
@@ -187,6 +205,11 @@ World::display_pixel(const int row, const int column, const RGBColor& raw_color)
    paintArea->setPixel(x, y, (int)(mapped_color.r * 255),
                              (int)(mapped_color.g * 255),
                              (int)(mapped_color.b * 255));
+}
+
+void World::display_pixels(const std::vector<RenderPixelData> &pixels) const
+{
+	paintArea->setPixels(pixels);
 }
 
 // ----------------------------------------------------------------------------- hit_objects

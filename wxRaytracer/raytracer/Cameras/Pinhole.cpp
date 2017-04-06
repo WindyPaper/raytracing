@@ -5,6 +5,7 @@
 #include "Vector3D.h"
 #include "Pinhole.h"
 #include <math.h>
+#include "ThreadLocalStorge.h"
 
 // ----------------------------------------------------------------------------- default constructor
 
@@ -96,8 +97,60 @@ Pinhole::render_scene(const World& w) {
 		L *= exposure_time;
 		w.display_pixel(r, c, L);
 		//if(L.b < 0.1)
-		//int m = 0;
+		//int m = 0;		
 	}
 }
 
+void Pinhole::render_scene(RenderTLS *tls, const World &w, int offsetx, int offsety, int width, int height)
+{
+	RGBColor	L;
+	ViewPlane	vp(w.vp);
+	Ray			ray;
+	int 		depth = 0;
+	Point2D 	pp;		// sample point on a pixel
+	int n = (int)sqrt((float)vp.num_samples);
+
+	vp.s /= zoom;
+	ray.o = eye;
+
+	int end_w = offsetx + width;
+	int end_h = offsety + height;
+	for (int r = offsety; r < end_h; r++)			// up
+	{
+		for (int c = offsetx; c < end_w; c++) {		// across 					
+			L = black;
+
+			for (int p = 0; p < n; p++)			// up pixel
+				for (int q = 0; q < n; q++) {	// across pixel
+					pp.x = vp.s * (c - 0.5 * vp.hres + (q + 0.5) / n);
+					pp.y = vp.s * (r - 0.5 * vp.vres + (p + 0.5) / n);
+					ray.d = get_direction(pp);
+					L += w.tracer_ptr->trace_ray(ray, depth);
+				}
+
+			L /= vp.num_samples;
+			L *= exposure_time;
+			//w.display_pixel(r, c, L);
+			//if(L.b < 0.1)
+			//int m = 0;
+
+			RGBColor mapped_color;
+			if (vp.show_out_of_gamut)
+				mapped_color = w.clamp_to_color(L);
+			else
+				mapped_color = w.max_to_one(L);
+
+			if (vp.gamma != 1.0)
+				mapped_color = mapped_color.powc(vp.inv_gamma);
+
+			//have to start from max y coordinate to convert to screen coordinates
+			int x = c;
+			int y = vp.vres - r - 1;
+			tls->renderPixelData.push_back(RenderPixelData(x, y, mapped_color.r * 255, mapped_color.g * 255, mapped_color.b * 255));
+		}
+	}
+
+	w.display_pixels(tls->renderPixelData);
+	//tls->renderPixelData.clear();
+}
 

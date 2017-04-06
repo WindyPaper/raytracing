@@ -60,7 +60,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;raytracer\Thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;__WIN32__;__WXMSW__;WINVER=0x0400;STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Debug\wxRaytracer.pch</PrecompiledHeaderOutputFile>
@@ -208,6 +208,7 @@
     <ClCompile Include="raytracer\Samplers\NRooks.cpp" />
     <ClCompile Include="raytracer\Samplers\Regular.cpp" />
     <ClCompile Include="raytracer\Samplers\Sampler.cpp" />
+    <ClCompile Include="raytracer\Thread\ThreadPool.cpp" />
     <ClCompile Include="raytracer\Tracers\AreaLighting.cpp" />
     <ClCompile Include="raytracer\Tracers\MultipleObjects.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
@@ -306,6 +307,8 @@
     <ClInclude Include="raytracer\Samplers\NRooks.h" />
     <ClInclude Include="raytracer\Samplers\Regular.h" />
     <ClInclude Include="raytracer\Samplers\Sampler.h" />
+    <ClInclude Include="raytracer\Thread\ThreadLocalStorge.h" />
+    <ClInclude Include="raytracer\Thread\ThreadPool.h" />
     <ClInclude Include="raytracer\Tracers\AreaLighting.h" />
     <ClInclude Include="raytracer\Tracers\MultipleObjects.h" />
     <ClInclude Include="raytracer\Tracers\PathTrace.h" />

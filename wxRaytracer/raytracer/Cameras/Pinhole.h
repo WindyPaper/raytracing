@@ -35,6 +35,8 @@ class Pinhole: public Camera {
 		
 		virtual void 												
 		render_scene(const World& w);
+
+		virtual void render_scene(RenderTLS *tls, const World &w, int offsetx, int offsety, int width, int height);
 		
 	private:
 			

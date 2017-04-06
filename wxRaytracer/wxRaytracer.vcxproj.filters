@@ -46,6 +46,9 @@
     <Filter Include="Build">
       <UniqueIdentifier>{a9c5a79e-4a7e-4eef-958a-897ec23cc751}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{d8c82ddf-c85d-40a1-9528-5b07623fc074}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="raytracer\BRDFs\BRDF.cpp">
@@ -248,6 +251,9 @@
     </ClCompile>
     <ClCompile Include="raytracer\Materials\Transparent.cpp">
       <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Thread\ThreadPool.cpp">
+      <Filter>Thread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -460,6 +466,12 @@
     </ClInclude>
     <ClInclude Include="raytracer\Materials\Transparent.h">
       <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Thread\ThreadPool.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Thread\ThreadLocalStorge.h">
+      <Filter>Thread</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

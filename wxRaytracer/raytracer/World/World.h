@@ -25,12 +25,13 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Ambient.h"
+#include "ThreadLocalStorge.h"
 
 
 using namespace std;
 
-class RenderThread; 	//part of skeleton - wxRaytracer.h
-
+class WxDrawPixels; 	//part of skeleton - wxRaytracer.h
+class ThreadPool;
 
 class World {	
 	public:
@@ -44,8 +45,10 @@ class World {
 		vector<GeometricObject*>	objects;		
 		vector<Light*> 				lights;
 		
-		RenderThread* 				paintArea; 	//connection to skeleton - wxRaytracer.h
-			
+		//RenderThread* 				paintArea; 	//connection to skeleton - wxRaytracer.h
+		WxDrawPixels*				paintArea;
+		
+		ThreadPool*			threadPool;
 
 	public:
 	
@@ -79,6 +82,8 @@ class World {
 		
 		void
 		display_pixel(const int row, const int column, const RGBColor& pixel_color) const;
+
+		void display_pixels(const std::vector<RenderPixelData> &pixels) const;
 
 		ShadeRec
 		hit_objects(const Ray& ray);

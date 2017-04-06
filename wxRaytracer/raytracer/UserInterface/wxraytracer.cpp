@@ -3,7 +3,7 @@
 #include "wxraytracer.h"
 #include "main.xpm"
 #include "bg.xpm"
-
+#include "ThreadPool.h"
 
 
 /******************************************************************************/
@@ -290,30 +290,30 @@ void RenderCanvas::OnRenderCompleted( wxCommandEvent& event )
 
 void RenderCanvas::OnNewPixel( wxCommandEvent& event )
 {
+	//iterate over all pixels in the event
+	vector<RenderPixel> *pixelsUpdate =
+		(vector<RenderPixel> *)event.GetClientData();
+	if (pixelsUpdate->empty())
+	{
+		return;
+	}
+
    //set up double buffered device context
    wxClientDC cdc(this);
    DoPrepareDC(cdc);
    wxBufferedDC bufferedDC(&cdc, *m_image);
    
-   //iterate over all pixels in the event
-   vector<RenderPixel*> *pixelsUpdate =
-                        (vector<RenderPixel*> *)event.GetClientData();
-   
-   for(vector<RenderPixel*>::iterator itr = pixelsUpdate->begin();
+   for(vector<RenderPixel>::iterator itr = pixelsUpdate->begin();
                         itr != pixelsUpdate->end(); itr++)
    {
-      RenderPixel* pixel = *itr;
-      
-      wxPen pen(wxColour(pixel->red, pixel->green, pixel->blue));
-      bufferedDC.SetPen(pen);
-      bufferedDC.DrawPoint(pixel->x, pixel->y);
+      RenderPixel &pixel = *itr;      
+
+	  wxPen pen(wxColour(pixel.red, pixel.green, pixel.blue));
+	  bufferedDC.SetPen(pen);
+	  bufferedDC.DrawPoint(pixel.x, pixel.y);
      
-      pixelsRendered++;
-      delete pixel;
-   }
-   
-   pixelsUpdate->clear();
-   delete pixelsUpdate;
+      pixelsRendered++;   
+   }   
 }
 
 void RenderCanvas::renderPause(void)
@@ -375,7 +375,7 @@ void RenderCanvas::OnTimerUpdate( wxTimerEvent& event )
 void RenderCanvas::renderStart(void)
 {
    w = new World();
-   
+
    wxGetApp().SetStatusText( wxT( "Building world..." ) );
    
    w->build();
@@ -410,11 +410,36 @@ void RenderCanvas::renderStart(void)
    //start timer
    timer = new wxStopWatch();
    
-   thread = new RenderThread(this, w);
+   /*thread = new RenderThread(this, w);
    thread->Create();
    w->paintArea = thread;
    thread->SetPriority(20);
-   thread->Run();
+   thread->Run();*/
+   const ViewPlane &vp = w->vp;
+
+   w->paintArea = new WxDrawPixels(this, vp.hres ,vp.vres);
+
+   int max_thread = 4;
+
+   int tile_w = vp.hres / (max_thread / 2);
+   int tile_h = vp.vres / (max_thread / 2);
+   int spare_w = vp.hres % (max_thread / 2);
+   int spare_h = vp.vres % (max_thread / 2);
+   for (int i = 0; i < (max_thread / 2); ++i)
+   {
+	   for (int j = 0; j < (max_thread / 2); ++j)
+	   {
+		   int rw = tile_w;
+		   int rh = tile_h;
+		   /*if (i == max_thread - 1)
+		   {
+			   rw += spare_w;
+			   rh += spare_h;
+		   }*/
+		   TaskInfo *pTask = new TaskInfo(tile_w * i, tile_h * j, rw, rh, w);
+		   w->threadPool->addTask(pTask);
+	   }	   
+   }
 }
 
 /******************************************************************************/
@@ -427,6 +452,12 @@ RenderPixel::RenderPixel(int _x, int _y, int _red, int _green, int _blue)
 {}
 
 
+
+RenderPixel::RenderPixel() :
+	x(0), y(0), red(0), green(0), blue(0)
+{
+
+}
 
 /******************************************************************************/
 /********************* RenderThread *******************************************/
@@ -486,4 +517,56 @@ void *RenderThread::Entry()
    world->camera_ptr->render_scene(*world);
 
    return NULL;
+}
+
+WxDrawPixels::WxDrawPixels(RenderCanvas *c, int width, int height) :
+	width(width),
+	height(height),
+	canvas(c),
+	timer(NULL),
+	lastUpdateTime(0)
+{
+	pixels.resize(width * height);
+	timer = new wxStopWatch();
+}
+
+WxDrawPixels::~WxDrawPixels()
+{
+	if (timer)
+	{
+		delete timer;
+		timer = NULL;
+	}
+}
+
+void WxDrawPixels::setPixel(int x, int y, int red, int green, int blue)
+{
+	//pixels.emplace_back(RenderPixel(x, y, red, green, blue));
+	const int pos = y * width + x;
+	
+	if(pos < pixels.size())
+		pixels[pos] = RenderPixel(x, y, red, green, blue);
+
+	if (timer->Time() - lastUpdateTime > 4000)
+		NotifyCanvas();
+}
+
+void WxDrawPixels::setPixels(const std::vector<RenderPixelData> &pixels)
+{
+	wxCommandEvent event(wxEVT_RENDER, ID_RENDER_NEWPIXEL);
+	event.SetClientData((void*)&pixels);
+	canvas->GetEventHandler()->AddPendingEvent(event);
+}
+
+void WxDrawPixels::NotifyCanvas()
+{
+	lastUpdateTime = timer->Time();
+
+	//copy rendered pixels into a new vector and reset
+	//vector<RenderPixel*> *pixelsUpdate = new vector<RenderPixel*>(pixels);
+	//pixels.clear();
+
+	wxCommandEvent event(wxEVT_RENDER, ID_RENDER_NEWPIXEL);
+	event.SetClientData(&pixels);
+	canvas->GetEventHandler()->AddPendingEvent(event);
 }
