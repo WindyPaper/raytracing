@@ -14,7 +14,7 @@
 BEGIN_EVENT_TABLE(wxraytracerapp, wxApp)
 END_EVENT_TABLE()
 
-IMPLEMENT_APP(wxraytracerapp)
+IMPLEMENT_APP_CONSOLE(wxraytracerapp)
 
 bool wxraytracerapp::OnInit()
 {

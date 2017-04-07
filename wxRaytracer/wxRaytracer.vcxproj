@@ -19,7 +19,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -89,7 +89,7 @@
       <OutputFile>.\Debug\wxRaytracer.exe</OutputFile>
       <AdditionalLibraryDirectories>wxwidgets\lib;wxWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;wxmsw28_core.lib;wxbase28.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalOptions> /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -103,7 +103,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;raytracer\Thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Release\wxRaytracer.pch</PrecompiledHeaderOutputFile>
@@ -129,10 +129,11 @@
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OutputFile>.\Release\wxRaytracer.exe</OutputFile>
       <AdditionalLibraryDirectories>wxwidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxmsw28_core.lib;wxbase28.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
