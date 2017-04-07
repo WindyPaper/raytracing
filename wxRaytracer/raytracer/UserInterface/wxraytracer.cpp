@@ -292,11 +292,7 @@ void RenderCanvas::OnNewPixel( wxCommandEvent& event )
 {
 	//iterate over all pixels in the event
 	vector<RenderPixel> *pixelsUpdate =
-		(vector<RenderPixel> *)event.GetClientData();
-	if (pixelsUpdate->empty())
-	{
-		return;
-	}
+		(vector<RenderPixel> *)event.GetClientData();	
 
    //set up double buffered device context
    wxClientDC cdc(this);
@@ -313,7 +309,9 @@ void RenderCanvas::OnNewPixel( wxCommandEvent& event )
 	  bufferedDC.DrawPoint(pixel.x, pixel.y);
      
       pixelsRendered++;   
-   }   
+   }
+
+   delete pixelsUpdate;
 }
 
 void RenderCanvas::renderPause(void)
@@ -421,22 +419,29 @@ void RenderCanvas::renderStart(void)
 
    int max_thread = 4;
 
-   int tile_w = vp.hres / (max_thread / 2);
-   int tile_h = vp.vres / (max_thread / 2);
-   int spare_w = vp.hres % (max_thread / 2);
-   int spare_h = vp.vres % (max_thread / 2);
-   for (int i = 0; i < (max_thread / 2); ++i)
+   int tile_w = 20;
+   int tile_h = 20;
+   int spare_w = vp.hres % tile_w;
+   int spare_h = vp.vres % tile_h;
+   int w_end = vp.hres / tile_w + (spare_w == 0 ? 0 : 1);
+   int h_end = vp.vres / tile_h + (spare_h == 0 ? 0 : 1);
+   for (int i = 0; i < h_end; ++i)
    {
-	   for (int j = 0; j < (max_thread / 2); ++j)
+	   for (int j = 0; j < w_end; ++j)
 	   {
 		   int rw = tile_w;
 		   int rh = tile_h;
-		   /*if (i == max_thread - 1)
+
+		   if (spare_h != 0 && i == h_end - 1)
 		   {
-			   rw += spare_w;
-			   rh += spare_h;
-		   }*/
-		   TaskInfo *pTask = new TaskInfo(tile_w * i, tile_h * j, rw, rh, w);
+			   rh = spare_h;			   
+		   }
+		   if (spare_w != 0 && j == w_end - 1)
+		   {
+			   rw = spare_w;
+		   }
+
+		   TaskInfo *pTask = new TaskInfo(tile_w * j, tile_h * i, rw, rh, w);
 		   w->threadPool->addTask(pTask);
 	   }	   
    }
@@ -553,8 +558,9 @@ void WxDrawPixels::setPixel(int x, int y, int red, int green, int blue)
 
 void WxDrawPixels::setPixels(const std::vector<RenderPixelData> &pixels)
 {
+	std::vector<RenderPixelData> *copyPixels = new std::vector<RenderPixelData>(pixels);
 	wxCommandEvent event(wxEVT_RENDER, ID_RENDER_NEWPIXEL);
-	event.SetClientData((void*)&pixels);
+	event.SetClientData((void*)copyPixels);
 	canvas->GetEventHandler()->AddPendingEvent(event);
 }
 

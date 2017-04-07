@@ -79,6 +79,12 @@ World::World(void)
 //------------------------------------------------------------------ destructor
 
 World::~World(void) {	
+
+	if (threadPool)
+	{
+		delete threadPool;
+		threadPool = NULL;
+	}
 	
 	if(tracer_ptr) {
 		delete tracer_ptr;
@@ -95,12 +101,6 @@ World::~World(void) {
 	if (camera_ptr) {
 		delete camera_ptr;
 		camera_ptr = NULL;
-	}
-
-	if (threadPool)
-	{
-		delete threadPool;
-		threadPool = NULL;
 	}
 
 	if (paintArea)

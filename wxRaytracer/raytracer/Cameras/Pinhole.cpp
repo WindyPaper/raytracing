@@ -151,6 +151,6 @@ void Pinhole::render_scene(RenderTLS *tls, const World &w, int offsetx, int offs
 	}
 
 	w.display_pixels(tls->renderPixelData);
-	//tls->renderPixelData.clear();
+	tls->renderPixelData.clear();
 }
 
