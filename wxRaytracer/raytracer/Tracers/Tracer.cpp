@@ -41,5 +41,10 @@ Tracer::trace_ray(const Ray ray, const int depth) const
 	return (white);
 }
 
+RGBColor Tracer::trace_ray(const Ray ray, double &t, const int depth) const
+{
+	assert(false);
+	return (white);
+}
 
 

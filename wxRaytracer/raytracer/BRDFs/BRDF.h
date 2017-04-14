@@ -9,6 +9,7 @@
 #include "Vector3D.h"
 #include "ShadeRec.h"
 #include "Sampler.h"
+#include "Constants.h"
 
 class BRDF {
 	public:

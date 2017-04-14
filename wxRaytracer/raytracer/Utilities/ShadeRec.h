@@ -29,6 +29,7 @@ class ShadeRec {
 		float				t;					// ray parameter
 		World&				w;					// World reference
 		RGBColor            color; //used in chapter 3 only
+		float u, v;
 				
 		ShadeRec(World& wr);					// constructor
 		

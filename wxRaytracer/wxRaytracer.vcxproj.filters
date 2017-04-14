@@ -255,6 +255,72 @@
     <ClCompile Include="raytracer\Thread\ThreadPool.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\Materials\Dielectric.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\FresnelReflector.cpp">
+      <Filter>BRDFs</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\FresnelTransmitter.cpp">
+      <Filter>BTDFs</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Mappings\Mapping.cpp">
+      <Filter>Mappings</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\ConstantColor.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\Image.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\ImageTexture.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\Texture.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_Emissive.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_GlossyReflector.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_GlossySpecular.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_Lambertian.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_Matte.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_PerfectSpecular.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_Phong.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_Reflector.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\SphereChecker.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\SphereTextures.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SphereMaterials.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Mappings\RectangularMap.cpp">
+      <Filter>Mappings</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Mappings\SphericalMap.cpp">
+      <Filter>Mappings</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Textures\Checker3D.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -472,6 +538,72 @@
     </ClInclude>
     <ClInclude Include="raytracer\Thread\ThreadLocalStorge.h">
       <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\Dielectric.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BRDFs\FresnelReflector.h">
+      <Filter>BRDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BRDFs\FresnelTransmitter.h">
+      <Filter>BTDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Mappings\Mapping.h">
+      <Filter>Mappings</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\ConstantColor.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\Image.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\ImageTexture.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\Texture.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_Reflector.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_Emissive.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_GlossyReflector.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_GlossySpecular.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_Lambertian.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_Matte.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_PerfectSpecular.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_Phong.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\SphereChecker.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\SphereTextures.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SphereMaterials.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Mappings\RectangularMap.h">
+      <Filter>Mappings</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Mappings\SphericalMap.h">
+      <Filter>Mappings</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\Checker3D.h">
+      <Filter>Textures</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

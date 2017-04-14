@@ -27,6 +27,9 @@ class Tracer {
 
 		virtual RGBColor	
 		trace_ray(const Ray ray, const int depth) const;
+
+		virtual RGBColor
+			trace_ray(const Ray ray, double &t, const int depth) const;
 				
 	protected:
 	
