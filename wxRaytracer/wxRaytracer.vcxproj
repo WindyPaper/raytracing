@@ -231,6 +231,7 @@
     <ClCompile Include="raytracer\Textures\SphereChecker.cpp" />
     <ClCompile Include="raytracer\Textures\SphereTextures.cpp" />
     <ClCompile Include="raytracer\Textures\Texture.cpp" />
+    <ClCompile Include="raytracer\Textures\TInstance.cpp" />
     <ClCompile Include="raytracer\Thread\ThreadPool.cpp" />
     <ClCompile Include="raytracer\Tracers\AreaLighting.cpp" />
     <ClCompile Include="raytracer\Tracers\MultipleObjects.cpp">
@@ -352,6 +353,7 @@
     <ClInclude Include="raytracer\Textures\SphereChecker.h" />
     <ClInclude Include="raytracer\Textures\SphereTextures.h" />
     <ClInclude Include="raytracer\Textures\Texture.h" />
+    <ClInclude Include="raytracer\Textures\TInstance.h" />
     <ClInclude Include="raytracer\Thread\ThreadLocalStorge.h" />
     <ClInclude Include="raytracer\Thread\ThreadPool.h" />
     <ClInclude Include="raytracer\Tracers\AreaLighting.h" />

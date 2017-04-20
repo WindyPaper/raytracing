@@ -321,6 +321,9 @@
     <ClCompile Include="raytracer\Textures\Checker3D.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\Textures\TInstance.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -603,6 +606,9 @@
       <Filter>Mappings</Filter>
     </ClInclude>
     <ClInclude Include="raytracer\Textures\Checker3D.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Textures\TInstance.h">
       <Filter>Textures</Filter>
     </ClInclude>
   </ItemGroup>
