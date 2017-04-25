@@ -1,29 +1,60 @@
-#ifndef _SOLID_CYLINDER_H_
-#define _SOLID_CYLINDER_H_
+// 	Copyright (C) Mp77 2012
+//	Original from Kevin Suffern 2000-2007
+//	This C++ code is for non-commercial purposes only.
+//	This C++ code is licensed under the GNU General Public License Version 2.
+//	See the file COPYING.txt for the full license.
 
-#include "GeometricObject.h"
+#pragma once
 
-class SolidCylinder : public GeometricObject
-{
-public:
-	SolidCylinder(float bottom, float top, float radius);
-	~SolidCylinder();
+#include "Compound.h"
 
-	virtual SolidCylinder *clone(void) const;
+#include "Disk.h"
 
-	virtual bool hit(const Ray& ray, double& tmin, ShadeRec *sr = 0) const;
+class SolidCylinder: public Compound {
+	public:
+		
+		SolidCylinder(void);   									
+		
+		SolidCylinder(const double bottom, const double top, const double radius);
+		
+		SolidCylinder(const SolidCylinder& cc);
 
-	virtual bool
+		~SolidCylinder (void);   									
+
+		SolidCylinder& 												
+		operator= (const SolidCylinder& c);	
+
+		virtual SolidCylinder* 										
+		clone(void) const;
+
+		virtual bool 															 
+		hit(const Ray& ray, double& tmin, ShadeRec* s = 0) const;
+		
+		virtual bool 																						 
 		shadow_hit(const Ray& ray, double& tmin) const;
 
-private:
-	float bottom;
-	float top;
-	float radius;
+		virtual void 
+		set_material(Material* material_ptr);
 
-	BBox bbox;
+		virtual void 
+		set_bottom_material(Material* material_ptr);	//19.29
 
-	static const double kEpsilon;
+		virtual void 
+		set_top_material(Material* material_ptr);	//19.29
+
+		virtual void 
+		set_wall_material(Material* material_ptr);	//19.29
+
+		virtual BBox 
+		get_bounding_box(void);
+		
+	private:
+	
+		void 													
+		delete_objects(void);								
+
+		void												
+		copy_objects(const vector<GeometricObject*>& rhs_objects);
+		
+		BBox		bbox;	// the bounding box
 };
-
-#endif

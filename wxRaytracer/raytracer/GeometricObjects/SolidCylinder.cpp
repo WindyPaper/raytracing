@@ -1,123 +1,183 @@
+// 	Copyright (C) Mp77 2012
+//	Original from Kevin Suffern 2000-2007
+//	This C++ code is for non-commercial purposes only.
+//	This C++ code is licensed under the GNU General Public License Version 2.
+//	See the file COPYING.txt for the full license.
+
 #include "SolidCylinder.h"
-#include <math.h>
 
-const double SolidCylinder::kEpsilon = 0.001;
+#include "OpenCylinder.h"
 
-SolidCylinder::SolidCylinder(float bottom, float top, float radius) :
-bottom(bottom),
-top(top),
-radius(radius)
-{
-
-}
-
-SolidCylinder::~SolidCylinder()
-{
-
-}
-
-SolidCylinder * SolidCylinder::clone(void) const
-{
-	return 0;
-}
-
-bool SolidCylinder::hit(const Ray& ray, double& tmin, ShadeRec *sr) const
-{
-	const Vector3D &start = ray.o;
-	const Vector3D &dir = ray.d;
-
-	float a = dir.x * dir.x + dir.z * dir.z;
-	float b = 2 * start.x * dir.x + 2 * start.z * dir.z;
-	float c = start.x * start.x + start.z * start.z - radius * radius;
-
-	float t0, t1;
-	float b24ac = b * b - 4 * a * c;
-	if (b24ac < kEpsilon)
-	{
-		return false;
-	}
-
-	float sqb24ac = std::sqrtf(b24ac);
-
-	t0 = (-b + sqb24ac) / (2 * a);
-	t1 = (-b - sqb24ac) / (2 * a);
-
-	if (t0 > t1)
-	{
-		float tmp = t0;
-		t0 = t1;
-		t1 = tmp;
-	}
-
-	float y0 = start.y + t0 * dir.y;
-	float y1 = start.y + t1 * dir.y;
-
-	if (y0 < bottom)
-	{
-		if (y1 < bottom)
-		{
-			return false;
-		}
-		else
-		{
-			float th = (bottom - start.y) / dir.y;
-			if (th <= kEpsilon) //保证起点在圆柱外面
-			{
-				return false;
-			}
-
-			Vector3D hit_pos = start + dir * th;
-			if (sr)
-			{
-				sr->hit_point = Point3D(hit_pos.x, hit_pos.y, hit_pos.z);
-				sr->normal = Normal(0, -1, 0);
-			}
-			return true;
-		}
-	}
-	else if (y0 >= bottom && y0 <= top)
-	{
-		if (t0 <= kEpsilon) //保证起点在圆柱外面
-		{
-			return false;
-		}
-
-		Vector3D hit_pos = start + dir * t0;
-		if (sr)
-		{
-			sr->hit_point = Point3D(hit_pos.x, hit_pos.y, hit_pos.z);
-			sr->normal = Normal(hit_pos.x, 0, hit_pos.z);
-			sr->normal.normalize();
-		}
-		return true;
-	}
-	else
-	{
-		if (y1 > top)
-		{
-			return false;
-		}
+SolidCylinder::SolidCylinder(	const double bottom, 
+								const double top, 
+								const double radius)
+			: Compound() {
 		
-		float th = (top - start.y) / dir.y;
-		if (th <= kEpsilon)
-		{
-			return false;
-		}
+	objects.push_back(new Disk(	Point3D(0, bottom, 0), 			// bottom
+								Normal(0, -1, 0), 
+								radius));  
+		
+	objects.push_back(new Disk(	Point3D(0, top, 0), 			// top
+								Normal(0, 1, 0), 
+								radius));   	
+		
+	objects.push_back(new OpenCylinder(bottom, top, radius));	// wall
 
-		Vector3D hit_pos = start + dir * th;
-		if (sr)
-		{
-			sr->hit_point = Point3D(hit_pos.x, hit_pos.y, hit_pos.z);
-			sr->normal = Normal(0, 1, 0);
-			sr->normal.normalize();
-		}
-		return true;
-	}
-
-	return false;
+	bbox.x0 = -radius;
+	bbox.y0 = bottom;
+	bbox.z0 = -radius;
+	bbox.x1 = radius;
+	bbox.y1 = top;
+	bbox.z1 = radius;
 }
 
-bool SolidCylinder::shadow_hit(const Ray& ray, double& tmin) const
+// ----------------------------------------------------------------  default constructor
+
+SolidCylinder::SolidCylinder (void)
+	: 	Compound()
 {
-	return hit(ray, tmin);
+	//This is new function for chapter 30 for any diffault para solid cylinders. Ex 30.12
+	objects.push_back(new Disk(	Point3D(0, -1, 0), 			// bottom
+								Normal(0, -1, 0), 
+								1));  
+		
+	objects.push_back(new Disk(	Point3D(0, 1, 0), 			// top
+								Normal(0, 1, 0), 
+								1));   	
+		
+	objects.push_back(new OpenCylinder(-1, 1, 1));	// wall
+
+	bbox.x0 = -1;
+	bbox.y0 = -1;
+	bbox.z0 = -1;
+	bbox.x1 = 1;
+	bbox.y1 = 1;
+	bbox.z1 = 1;
+}
+
+
+// ---------------------------------------------------------------- clone
+
+SolidCylinder* 
+SolidCylinder::clone(void) const {
+	return (new SolidCylinder(*this));
+}
+
+
+// ---------------------------------------------------------------- copy constructor
+
+SolidCylinder::SolidCylinder (const SolidCylinder& c)
+	: Compound(c) {
+	
+	copy_objects(c.objects);					
+}
+
+
+
+// ---------------------------------------------------------------- assignment operator
+
+SolidCylinder& 
+SolidCylinder::operator= (const SolidCylinder& rhs) {
+	if (this == &rhs)
+		return (*this);
+
+	GeometricObject::operator= (rhs);						
+	
+	copy_objects(rhs.objects);				
+
+	return (*this);
+}
+
+
+// ---------------------------------------------------------------- destructor
+
+SolidCylinder::~SolidCylinder(void) {	
+	delete_objects();				
+}
+
+
+//------------------------------------------------------------------ set_material
+// sets the same material on all objects
+
+void 
+SolidCylinder::set_material(Material* material_ptr) {
+	int num_objects = objects.size();
+
+	for (int j = 0; j < num_objects; j++)
+		objects[j]->set_material(material_ptr);
+}
+
+
+//------------------------------------------------------------------ delete_objects
+// Deletes the objects in the objects array, and erases the array.
+// The array still exists, because it'ss an automatic variable, but it's empty 
+
+void
+SolidCylinder::delete_objects(void) {
+	int num_objects = objects.size();
+	
+	for (int j = 0; j < num_objects; j++) {
+		delete objects[j];
+		objects[j] = NULL;
+	}	
+	
+	objects.erase(objects.begin(), objects.end());
+}
+
+
+//------------------------------------------------------------------ copy_objects
+
+void
+SolidCylinder::copy_objects(const vector<GeometricObject*>& rhs_ojects) {
+	delete_objects();    	
+	int num_objects = rhs_ojects.size();
+	
+	for (int j = 0; j < num_objects; j++)
+		objects.push_back(rhs_ojects[j]->clone());
+}
+
+
+//------------------------------------------------------------------ hit
+
+bool 															 
+SolidCylinder::hit(const Ray& ray, double& tmin, ShadeRec* sr) const {
+	if (bbox.hit(ray))
+		return (Compound::hit(ray, tmin, sr));
+	else
+		return (false);
+}
+
+// ------------------------------------------------- shadow hit
+
+bool 																						 
+SolidCylinder::shadow_hit(const Ray& ray, double& tmin) const
+{
+	if (bbox.hit(ray))
+		return (Compound::shadow_hit(ray, tmin));
+	else
+		return (false);
+}
+
+void 
+SolidCylinder::set_bottom_material(Material* material_ptr)
+{
+	objects[0]->set_material(material_ptr);
+}	//19.29
+
+void 
+SolidCylinder::set_top_material(Material* material_ptr)
+{
+	objects[1]->set_material(material_ptr);
+}	//19.29
+
+void 
+SolidCylinder::set_wall_material(Material* material_ptr)
+{
+	objects[2]->set_material(material_ptr);
+}//19.29
+
+BBox 
+SolidCylinder::get_bounding_box(void)
+{
+	return bbox;
 }

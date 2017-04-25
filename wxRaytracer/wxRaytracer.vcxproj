@@ -162,6 +162,7 @@
     <ClCompile Include="raytracer\GeometricObjects\Compound.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\ConcaveSphere.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\ConvexPartCylinder.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\Disk.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\FlatMeshTriangle.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\GeometricObject.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
@@ -170,6 +171,7 @@
     <ClCompile Include="raytracer\GeometricObjects\Instance.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\Mesh.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\MeshTriangle.cpp" />
+    <ClCompile Include="raytracer\GeometricObjects\OpenCylinder.cpp" />
     <ClCompile Include="raytracer\GeometricObjects\Plane.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
     </ClCompile>
@@ -300,12 +302,14 @@
     <ClInclude Include="raytracer\GeometricObjects\Compound.h" />
     <ClInclude Include="raytracer\GeometricObjects\ConcaveSphere.h" />
     <ClInclude Include="raytracer\GeometricObjects\ConvexPartCylinder.h" />
+    <ClInclude Include="raytracer\GeometricObjects\Disk.h" />
     <ClInclude Include="raytracer\GeometricObjects\FlatMeshTriangle.h" />
     <ClInclude Include="raytracer\GeometricObjects\GeometricObject.h" />
     <ClInclude Include="raytracer\GeometricObjects\Grid.h" />
     <ClInclude Include="raytracer\GeometricObjects\Instance.h" />
     <ClInclude Include="raytracer\GeometricObjects\Mesh.h" />
     <ClInclude Include="raytracer\GeometricObjects\MeshTriangle.h" />
+    <ClInclude Include="raytracer\GeometricObjects\OpenCylinder.h" />
     <ClInclude Include="raytracer\GeometricObjects\Plane.h" />
     <ClInclude Include="raytracer\GeometricObjects\ply.h" />
     <ClInclude Include="raytracer\GeometricObjects\Rectangle.h" />

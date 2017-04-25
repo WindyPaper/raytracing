@@ -54,7 +54,7 @@ World::build(void) {
 
 	int num_samples = 16;
 
-	int sample_type = 2;
+	int sample_type = 4;
 
 	switch (sample_type)
 	{
@@ -221,7 +221,7 @@ World::build(void) {
 		break;
 	case 1:
 	{
-		int num_samples = 16;
+		//int num_samples = 16;
 
 		vp.set_hres(600);
 		vp.set_vres(400);
@@ -230,7 +230,7 @@ World::build(void) {
 
 		background_color = RGBColor(0.0);
 
-		tracer_ptr = new RayCast(this);
+		tracer_ptr = new PathTrace(this);
 
 		Pinhole* pinhole_ptr = new Pinhole;
 		pinhole_ptr->set_eye(5, 1.5, 8);
@@ -266,6 +266,9 @@ World::build(void) {
 		sv_matte_ptr->set_ka(0.40);
 		sv_matte_ptr->set_kd(0.95);
 		sv_matte_ptr->set_cd(texture_ptr);
+		MultiJittered *p_sv_multi_jitter = new MultiJittered(num_samples);
+		p_sv_multi_jitter->map_samples_to_hemisphere(1.0);
+		sv_matte_ptr->set_sampler(p_sv_multi_jitter);
 
 		// generic rectangle:
 
@@ -286,6 +289,9 @@ World::build(void) {
 		matte_ptr1->set_ka(0.25);
 		matte_ptr1->set_kd(0.5);
 		matte_ptr1->set_cd(1.0);
+		MultiJittered *p_matte_jitter = new MultiJittered(num_samples);
+		p_matte_jitter->map_samples_to_hemisphere(1.0);
+		matte_ptr1->set_sampler(p_matte_jitter);
 
 		Plane* plane_ptr = new Plane(Point3D(0.0, -1.0, 0.0), Normal(0.0, 1.0, 0.0));
 		plane_ptr->set_material(matte_ptr1);
@@ -335,6 +341,242 @@ World::build(void) {
 		transformed_box_ptr->scale(2, 1, 1);
 		transformed_box_ptr->rotate_z(45);
 		add_object(transformed_box_ptr);
+	}
+	break;
+	case 3:
+	{
+		//int num_samples = 256;
+
+		vp.set_hres(600);
+		vp.set_vres(400);
+		vp.set_samples(num_samples);
+		vp.set_max_depth(0);
+
+		tracer_ptr = new AreaLighting(this);
+
+		AmbientOccluder* ambient_occluder_ptr = new AmbientOccluder;
+		ambient_occluder_ptr->set_sampler(new MultiJittered(num_samples));
+		ambient_occluder_ptr->set_min_amount(0.5);
+		set_ambient_light(ambient_occluder_ptr);
+
+
+		Pinhole* pinhole_ptr = new Pinhole;
+		pinhole_ptr->set_eye(100, 45, 100);
+		pinhole_ptr->set_lookat(-10, 40, 0);
+		pinhole_ptr->set_view_distance(400);
+		pinhole_ptr->compute_uvw();
+		set_camera(pinhole_ptr);
+
+
+		Emissive* emissive_ptr = new Emissive;
+		emissive_ptr->set_ce(1.0, 1.0, 0.5); 	// lemon
+		emissive_ptr->scale_radiance(0.9);
+
+
+
+		float ka = 0.2;  // commom ambient reflection coefficient
+
+						 // large sphere
+
+		Matte* matte_ptr1 = new Matte;
+		matte_ptr1->set_ka(ka);
+		matte_ptr1->set_kd(0.60);
+		matte_ptr1->set_cd(0.75);
+
+		Sphere* sphere_ptr1 = new Sphere(Point3D(38, 20, -24), 20);
+		sphere_ptr1->set_material(matte_ptr1);
+		add_object(sphere_ptr1);
+
+
+		// small sphere
+
+		Matte* matte_ptr2 = new Matte;
+		matte_ptr2->set_ka(ka);
+		matte_ptr2->set_kd(0.4);
+		matte_ptr2->set_cd(0.25, 1.0, 0.35);       // green
+
+		Sphere* sphere_ptr2 = new Sphere(Point3D(34, 12, 13), 12);
+		sphere_ptr2->set_material(matte_ptr2);
+		add_object(sphere_ptr2);
+
+
+		// medium sphere
+
+		Matte* matte_ptr3 = new Matte;
+		matte_ptr3->set_ka(ka);
+		matte_ptr3->set_kd(0.5);
+		matte_ptr3->set_cd(0.75);
+
+		Sphere* sphere_ptr3 = new Sphere(Point3D(-7, 15, 42), 16);
+		sphere_ptr3->set_material(matte_ptr3);
+		add_object(sphere_ptr3);
+
+
+		// cylinder
+
+		Phong* phong_ptr = new Phong;
+		phong_ptr->set_ka(ka);
+		phong_ptr->set_kd(0.25);
+		phong_ptr->set_cd(0.60);
+		phong_ptr->set_ks(0.5);
+		phong_ptr->set_exp(100);
+
+		float bottom = 0.0;
+		float top = 85;
+		float radius = 22;
+		SolidCylinder* cylinder_ptr = new SolidCylinder(bottom, top, radius);
+		cylinder_ptr->set_material(phong_ptr);
+		add_object(cylinder_ptr);
+
+
+		// box
+
+		Matte* matte_ptr4 = new Matte;
+		matte_ptr4->set_ka(ka);
+		matte_ptr4->set_kd(0.5);
+		matte_ptr4->set_cd(0.95);
+
+		Box* box_ptr = new Box(Point3D(-35, 0, -110), Point3D(-25, 60, 65));
+		box_ptr->set_material(matte_ptr4);
+		add_object(box_ptr);
+
+
+		// ground plane 
+
+		Matte* matte_ptr5 = new Matte;
+		matte_ptr5->set_ka(0.15);
+		matte_ptr5->set_kd(0.5);
+		matte_ptr5->set_cd(0.7);
+
+		Plane* plane_ptr = new Plane(Point3D(0, 0.01, 0), Normal(0, 1, 0));
+		plane_ptr->set_material(matte_ptr5);
+		add_object(plane_ptr);		
+	}
+	break;
+	case 4:
+	{
+		//18.04a
+		//int num_samples = 1;   		// for Figure 18.4(a)
+									//	int num_samples = 100;   	// for Figure 18.4(b) & (c)
+
+		vp.set_hres(600);
+		vp.set_vres(400);
+		vp.set_samples(num_samples);
+		vp.set_max_depth(5);				// for Figure 26.6(a)
+											//	vp.set_max_depth(1);				// for Figure 26.6(b)
+											//	vp.set_max_depth(5);				// for Figure 26.6(c)
+
+		tracer_ptr = new PathTrace(this);
+
+		Ambient* ambient_ptr = new Ambient;
+		ambient_ptr->scale_radiance(0.0);
+		set_ambient_light(ambient_ptr);
+
+
+		Pinhole* pinhole_ptr = new Pinhole;
+		pinhole_ptr->set_eye(100, 45, 100);
+		pinhole_ptr->set_lookat(-10, 40, 0);
+		pinhole_ptr->set_view_distance(400);
+		pinhole_ptr->compute_uvw();
+		set_camera(pinhole_ptr);
+
+
+		Emissive* emissive_ptr = new Emissive;
+		emissive_ptr->set_ce(white);
+		emissive_ptr->scale_radiance(1.5);
+
+
+		ConcaveSphere* sphere_ptr = new ConcaveSphere;		// centered on the origin
+		sphere_ptr->set_radius(1000000.0);
+		sphere_ptr->set_shadows(false);
+		sphere_ptr->set_material(emissive_ptr);
+		add_object(sphere_ptr);
+
+
+		float ka = 0.2;  // common ambient reflection coefficient	
+
+
+						 // large sphere
+
+		Matte* matte_ptr1 = new Matte;
+		matte_ptr1->set_ka(ka);
+		matte_ptr1->set_kd(0.60);
+		matte_ptr1->set_cd(white);
+		matte_ptr1->set_sampler(new MultiJittered(num_samples));
+
+		Sphere* sphere_ptr1 = new Sphere(Point3D(38, 20, -24), 20);
+		sphere_ptr1->set_material(matte_ptr1);
+		add_object(sphere_ptr1);
+
+
+		// small sphere
+
+		Matte* matte_ptr2 = new Matte;
+		matte_ptr2->set_ka(ka);
+		matte_ptr2->set_kd(0.5);
+		matte_ptr2->set_cd(0.85);				// gray
+		matte_ptr2->set_sampler(new MultiJittered(num_samples));
+
+		Sphere* sphere_ptr2 = new Sphere(Point3D(34, 12, 13), 12);
+		sphere_ptr2->set_material(matte_ptr2);
+		add_object(sphere_ptr2);
+
+
+		// medium sphere
+
+		Matte* matte_ptr3 = new Matte;
+		matte_ptr3->set_ka(ka);
+		matte_ptr3->set_kd(0.75);
+		matte_ptr3->set_cd(0.73, 0.22, 0.0);    // orange
+		matte_ptr3->set_sampler(new MultiJittered(num_samples));
+
+		Sphere* sphere_ptr3 = new Sphere(Point3D(-7, 15, 42), 16);
+		sphere_ptr3->set_material(matte_ptr3);
+		add_object(sphere_ptr3);
+
+
+		// cylinder
+
+		Matte* matte_ptr4 = new Matte;
+		matte_ptr4->set_ka(ka);
+		matte_ptr4->set_kd(0.75);
+		matte_ptr4->set_cd(0.60);				// gray
+		matte_ptr4->set_sampler(new MultiJittered(num_samples));
+
+		double bottom = 0.0;
+		double top = 85.0;
+		double radius = 22.0;
+		SolidCylinder* cylinder_ptr = new SolidCylinder(bottom, top, radius);
+		cylinder_ptr->set_material(matte_ptr4);
+		add_object(cylinder_ptr);
+
+
+		// box
+
+		Matte* matte_ptr5 = new Matte;
+		matte_ptr5->set_ka(ka);
+		matte_ptr5->set_kd(0.75);
+		matte_ptr5->set_cd(0.95);				// gray
+		matte_ptr5->set_sampler(new MultiJittered(num_samples));
+
+		Box* box_ptr = new Box(Point3D(-55, 0, -110), Point3D(-25, 60, 65));  // thicker
+		box_ptr->set_material(matte_ptr5);
+		add_object(box_ptr);
+
+
+		// ground plane
+
+		MultiJittered* sampler_ptr6 = new MultiJittered(num_samples);
+
+		Matte* matte_ptr6 = new Matte;
+		matte_ptr6->set_ka(0.15);
+		matte_ptr6->set_kd(0.95);
+		matte_ptr6->set_cd(0.37, 0.43, 0.08);     // olive green
+		matte_ptr6->set_sampler(new MultiJittered(num_samples));
+
+		Plane* plane_ptr = new Plane(Point3D(0, 0.01, 0), Normal(0, 1, 0));
+		plane_ptr->set_material(matte_ptr6);
+		add_object(plane_ptr);
 	}
 	break;
 	default:

@@ -5,6 +5,9 @@
 
 #include <algorithm>   // for random_shuffle in Sampler::setup_shuffled_indices
 
+#include <assert.h>
+#include <type_traits>
+
 #include "Constants.h"
 #include "Sampler.h"
 
@@ -314,8 +317,8 @@ Point3D
 Sampler::sample_hemisphere(void) {
 	if (count % num_samples == 0)  									// start of a new pixel
 		jump = (rand_int() % num_sets) * num_samples;
-		
-	return (hemisphere_samples[jump + shuffled_indices[jump + count++ % num_samples]]);		
+	
+	return (hemisphere_samples.at(jump + shuffled_indices.at(jump + count++ % num_samples)));		
 }
 
 
