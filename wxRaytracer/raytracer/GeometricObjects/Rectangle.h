@@ -1,40 +1,41 @@
-#ifndef __RECTANGLE__
-#define __RECTANGLE__
-
 // 	Copyright (C) Kevin Suffern 2000-2007.
+//	Revised by mp77 at 2012
 //	This C++ code is for non-commercial purposes only.
 //	This C++ code is licensed under the GNU General Public License Version 2.
 //	See the file COPYING.txt for the full license.
 
+#pragma once
 
 #include "Sampler.h"
 #include "GeometricObject.h"
 
-class MyRectangle: public GeometricObject {	
+class TRectangle: public GeometricObject {	
 	public:
 		
-		MyRectangle(void);   									
+		TRectangle(void);   									
 				
-		MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b);
+		TRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b);
 		
-		MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b, const Normal& n);
+		TRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b, const Normal& n);
 		
-		virtual MyRectangle* 										
+		virtual GeometricObject*
 		clone(void) const;
 	
-		MyRectangle(const MyRectangle& r); 						
+		TRectangle(const TRectangle& r); 						
 
 		virtual													
-		~MyRectangle(void);   									
+		~TRectangle(void);   									
 
-		MyRectangle& 												
-		operator= (const MyRectangle& rhs);			
+		GeometricObject& 												
+		operator= (const TRectangle& rhs);
+		
+		BBox
+		get_bounding_box(void);				
 	
 		virtual bool 												 
-			hit(const Ray& ray, double& t, ShadeRec *sr = 0) const;
-				
-		
-		// the following functions are used when the rectangle is a light source
+		hit(const Ray& ray, double& t, ShadeRec* sr = 0) const;	
+
+		// the following functions are used when the TRectangle is a light source
 		
 		virtual void 								
 		set_sampler(Sampler* sampler); 
@@ -48,9 +49,13 @@ class MyRectangle: public GeometricObject {
 		virtual float												
 		pdf(ShadeRec& sr);
 
+		//bool shadow_hit(const Ray& ray, float& tmin) const;
+
 		virtual bool
 			shadow_hit(const Ray& ray, double& tmin) const;
 		
+		virtual void									
+		set_shadows(bool);
 	private:
 	
 		Point3D 		p0;   			// corner vertex 
@@ -64,7 +69,7 @@ class MyRectangle: public GeometricObject {
 		float			inv_area;		// for rectangular lights
 		Sampler*		sampler_ptr;	// for rectangular lights 	
 		
-		static const double kEpsilon;   											
-};
+		static const double kEpsilon;   	
 
-#endif
+		bool shadows;					// for cornell box only
+};

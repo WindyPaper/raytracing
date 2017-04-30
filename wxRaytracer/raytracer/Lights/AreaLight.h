@@ -40,9 +40,9 @@ public:
 private:
 	GeometricObject *object_ptr;
 	Material *mat_ptr;
-	Point3D sample_point; // sample point on surface
+	//Point3D sample_point; // sample point on surface
 	Normal light_normal;;
-	Vector3D wi; // unit vector from hit point to sample point
+	//Vector3D wi; // unit vector from hit point to sample point
 };
 
 #endif

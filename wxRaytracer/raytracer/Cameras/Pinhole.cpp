@@ -103,7 +103,7 @@ Pinhole::render_scene(const World& w) {
 
 void Pinhole::render_scene(RenderTLS *tls, const World &w, int offsetx, int offsety, int width, int height)
 {
-	RGBColor	L;
+	RGBColor L;
 	ViewPlane	vp(w.vp);
 	Ray			ray;
 	int 		depth = 0;

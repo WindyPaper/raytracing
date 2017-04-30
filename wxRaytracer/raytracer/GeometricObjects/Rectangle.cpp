@@ -1,16 +1,16 @@
 // 	Copyright (C) Kevin Suffern 2000-2007.
+//	Revised by mp77 at 2012
 //	This C++ code is for non-commercial purposes only.
 //	This C++ code is licensed under the GNU General Public License Version 2.
 //	See the file COPYING.txt for the full license.
 
-
 #include "Rectangle.h"
 
-const double MyRectangle::kEpsilon = 0.001;
+const double TRectangle::kEpsilon = 0.001;
 
 // ----------------------------------------------------------------  default constructor
 
-MyRectangle::MyRectangle(void)
+TRectangle::TRectangle(void)
 	: 	GeometricObject(),
 		p0(-1, 0, -1), 
 		a(0, 0, 2), b(2, 0, 0), 
@@ -19,14 +19,15 @@ MyRectangle::MyRectangle(void)
 		normal(0, 1, 0),
 		area(4.0),
 		inv_area(0.25),
-		sampler_ptr(NULL)
+		sampler_ptr(NULL),
+		shadows(false)
 {}
 
 
 // ----------------------------------------------------------------  constructor
 // this constructs the normal
 
-MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b)
+TRectangle::TRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b)
 	:	GeometricObject(),
 		p0(_p0),
 		a(_a),
@@ -35,7 +36,8 @@ MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D&
 		b_len_squared(b.len_squared()),
 		area(a.length() * b.length()),
 		inv_area(1.0 / area),
-		sampler_ptr(NULL)		
+		sampler_ptr(NULL),
+		shadows(false)
 {
 	normal = a ^ b;
 	normal.normalize();
@@ -45,7 +47,7 @@ MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D&
 // ----------------------------------------------------------------  constructor
 // this has the normal as an argument
 
-MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b, const Normal& n)
+TRectangle::TRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D& _b, const Normal& n)
 	:	GeometricObject(),
 		p0(_p0),
 		a(_a),
@@ -55,7 +57,8 @@ MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D&
 		area(a.length() * b.length()),	
 		inv_area(1.0 / area),
 		normal(n),
-		sampler_ptr(NULL)
+		sampler_ptr(NULL),
+		shadows(false)
 {
 	normal.normalize();
 }
@@ -64,15 +67,14 @@ MyRectangle::MyRectangle(const Point3D& _p0, const Vector3D& _a, const Vector3D&
 
 // ---------------------------------------------------------------- clone
 
-MyRectangle* 
-MyRectangle::clone(void) const {
-	return (new MyRectangle(*this));
+GeometricObject*
+TRectangle::clone(void) const {
+	return (new TRectangle(*this));
 }
-
 
 // ---------------------------------------------------------------- copy constructor
 
-MyRectangle::MyRectangle (const MyRectangle& r)
+TRectangle::TRectangle (const TRectangle& r)
 	:	GeometricObject(r),
 		p0(r.p0), 
 		a(r.a),
@@ -81,7 +83,8 @@ MyRectangle::MyRectangle (const MyRectangle& r)
 		b_len_squared(r.b_len_squared),	
 		normal(r.normal),
 		area(r.area),
-		inv_area(r.inv_area)
+		inv_area(r.inv_area),
+		shadows(r.shadows)
 {
 	if(r.sampler_ptr)
 		sampler_ptr	= r.sampler_ptr->clone(); 
@@ -92,8 +95,8 @@ MyRectangle::MyRectangle (const MyRectangle& r)
 
 // ---------------------------------------------------------------- assignment operator
 
-MyRectangle& 
-MyRectangle::operator= (const MyRectangle& rhs) {
+GeometricObject& 
+TRectangle::operator= (const TRectangle& rhs) {
 	if (this == &rhs)
 		return (*this);
 
@@ -107,6 +110,7 @@ MyRectangle::operator= (const MyRectangle& rhs) {
 	area			= rhs.area;	
 	inv_area		= rhs.inv_area;
 	normal			= rhs.normal;
+	shadows			= rhs.shadows;
 	
 	if (sampler_ptr) {
 		delete sampler_ptr;
@@ -122,7 +126,7 @@ MyRectangle::operator= (const MyRectangle& rhs) {
 
 // ---------------------------------------------------------------- destructor
 
-MyRectangle::~MyRectangle (void) {
+TRectangle::~TRectangle (void) {
 
 	if (sampler_ptr) {
 		delete sampler_ptr;
@@ -131,12 +135,21 @@ MyRectangle::~MyRectangle (void) {
 }
 
 //------------------------------------------------------------------ get_bounding_box 
+
+BBox
+TRectangle::get_bounding_box(void) {
+	double delta = 0.0001; 
+
+	return(BBox(min(p0.x, p0.x + a.x + b.x) - delta, max(p0.x, p0.x + a.x + b.x) + delta,
+				min(p0.y, p0.y + a.y + b.y) - delta, max(p0.y, p0.y + a.y + b.y) + delta, 
+				min(p0.z, p0.z + a.z + b.z) - delta, max(p0.z, p0.z + a.z + b.z) + delta));
+}
 																			
 
 //------------------------------------------------------------------ hit 
 
 bool 												 
-MyRectangle::hit(const Ray& ray, double& tmin, ShadeRec *sr) const {
+TRectangle::hit(const Ray& ray, double& tmin, ShadeRec* sr) const {
 	
 	double t = (p0 - ray.o) * normal / (ray.d * normal); 
 	
@@ -157,10 +170,11 @@ MyRectangle::hit(const Ray& ray, double& tmin, ShadeRec *sr) const {
 		return (false);
 		
 	tmin 				= t;
+
 	if (sr)
 	{
-		sr->normal 			= normal;
-		sr->local_hit_point 	= p;
+		sr->normal = normal;
+		sr->local_hit_point = p;
 	}
 	
 	return (true);
@@ -170,16 +184,16 @@ MyRectangle::hit(const Ray& ray, double& tmin, ShadeRec *sr) const {
 // ---------------------------------------------------------------- setSampler
 
 void 								
-MyRectangle::set_sampler(Sampler* sampler) {
+TRectangle::set_sampler(Sampler* sampler) {
 	sampler_ptr = sampler;
 }
 
 
 // ---------------------------------------------------------------- sample
-// returns a sample point on the rectangle
+// returns a sample point on the TRectangle
 
 Point3D 											
-MyRectangle::sample(void) {
+TRectangle::sample(void) {
 	Point2D sample_point = sampler_ptr->sample_unit_square();
 	return (p0 + sample_point.x * a + sample_point.y * b);
 }
@@ -188,7 +202,7 @@ MyRectangle::sample(void) {
 //------------------------------------------------------------------ get_normal 
 					 
 Normal 										
-MyRectangle::get_normal(const Point3D& p) {
+TRectangle::get_normal(const Point3D& p) {
 	return (normal);
 }
 
@@ -196,15 +210,38 @@ MyRectangle::get_normal(const Point3D& p) {
 // ---------------------------------------------------------------- pdf
 
 float
-MyRectangle::pdf(ShadeRec& sr) {	
+TRectangle::pdf(ShadeRec& sr) {	
 	return (inv_area);
 } 
 
+// ----------------------------------------------------------------- shadow hit
 
+bool 												
+TRectangle::shadow_hit(const Ray& ray, double& tmin) const {
+	double t = (p0 - ray.o) * normal / (ray.d * normal); 
+	
+	if (t <= kEpsilon)
+		return (false);
+			
+	Point3D p = ray.o + t * ray.d;
+	Vector3D d = p - p0;
+	
+	double ddota = d * a;
+	
+	if (ddota < 0.0 || ddota > a_len_squared)
+		return (false);
+		
+	double ddotb = d * b;
+	
+	if (ddotb < 0.0 || ddotb > b_len_squared)
+		return (false);
+		
+	tmin 				= t;	
+	return (true);
+}
 
-
-
-bool MyRectangle::shadow_hit(const Ray& ray, double& tmin) const
+void									
+TRectangle::set_shadows(bool b)
 {
-	return hit(ray, tmin);
+	shadows = b;
 }

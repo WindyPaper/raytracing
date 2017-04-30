@@ -20,7 +20,9 @@ ShadeRec::ShadeRec(World& wr)
 		ray(),
 		depth(0),
 		t(0.0),
-		w(wr)
+		w(wr),
+		light_sample_point(0.0),
+		light_wi(0.0f)
 {}
 
 
@@ -36,7 +38,9 @@ ShadeRec::ShadeRec(const ShadeRec& sr)
 		depth(sr.depth),
 		t(sr.t),
 		w(sr.w),
-		color(sr.color)
+		color(sr.color),
+		light_sample_point(0.0f),
+		light_wi(0.0f)
 {
 }
 

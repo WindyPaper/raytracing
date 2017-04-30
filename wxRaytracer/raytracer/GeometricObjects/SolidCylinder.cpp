@@ -7,6 +7,7 @@
 #include "SolidCylinder.h"
 
 #include "OpenCylinder.h"
+#include "Material.h"
 
 SolidCylinder::SolidCylinder(	const double bottom, 
 								const double top, 
@@ -104,7 +105,7 @@ SolidCylinder::set_material(Material* material_ptr) {
 	int num_objects = objects.size();
 
 	for (int j = 0; j < num_objects; j++)
-		objects[j]->set_material(material_ptr);
+		objects[j]->set_material(material_ptr->clone());
 }
 
 

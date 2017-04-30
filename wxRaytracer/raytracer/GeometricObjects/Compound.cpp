@@ -91,6 +91,8 @@ Compound::delete_objects(void) {
 	}	
 	
 	objects.erase(objects.begin(), objects.end());
+
+	material_ptr = NULL; //the matrial is referenced. bad design...
 }
 
 

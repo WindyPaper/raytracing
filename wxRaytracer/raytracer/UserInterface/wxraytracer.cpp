@@ -417,7 +417,7 @@ void RenderCanvas::renderStart(void)
 
    w->paintArea = new WxDrawPixels(this, vp.hres ,vp.vres);
 
-   int max_thread = 4;
+   //int max_thread = 1;
 
    int tile_w = 20;
    int tile_h = 20;

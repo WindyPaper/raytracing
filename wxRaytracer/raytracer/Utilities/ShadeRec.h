@@ -29,6 +29,8 @@ class ShadeRec {
 		float				t;					// ray parameter
 		World&				w;					// World reference
 		RGBColor            color; //used in chapter 3 only
+		Point3D		light_sample_point; // used for shadow ray hits the light point
+		Vector3D		light_wi;  //unit vector from hit point to sample point
 		float u, v;
 				
 		ShadeRec(World& wr);					// constructor
