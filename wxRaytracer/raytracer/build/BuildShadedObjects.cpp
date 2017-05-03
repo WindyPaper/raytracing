@@ -49,6 +49,7 @@
 #include "Checker3D.h"
 #include "TInstance.h"
 #include "Rectangle.h"
+#include "SV_GlossyFacet.h"
 
 void 												
 World::build(void) {
@@ -496,8 +497,8 @@ World::build(void) {
 		//add_object(sphere_ptr);
 
 		Point3D p0 = Point3D(-300, 0, 30);
-		Vector3D a = Vector3D(0.0, 0.0, -60);
-		Vector3D b = Vector3D(0.0, 60, 0.0);
+		Vector3D a = Vector3D(0.0, 0.0, -160);
+		Vector3D b = Vector3D(0.0, 160, 0.0);
 		Normal normal = Normal(1.0, 0.0, 0.0);
 		TRectangle *pLightRectangle = new TRectangle(p0, a, b, normal);
 		pLightRectangle->set_sampler(new MultiJittered(num_samples));
@@ -679,22 +680,28 @@ World::build(void) {
 
 		Box* box_ptr0 = new Box(Point3D(-1.5 * gap - 2.0 * box_width, 0.0, -0.5 * box_depth),
 			Point3D(-1.5 * gap - box_width, box_height, 0.5 * box_depth));
-		box_ptr0->set_material(matte_ptr1);
+		box_ptr0->set_material(matte_ptr1->clone());
 		add_object(box_ptr0);
 
 		Box* box_ptr1 = new Box(Point3D(-0.5 * gap - box_width, 0.0, -0.5 * box_depth),
 			Point3D(-0.5 * gap, box_height, 0.5 * box_depth));
-		box_ptr1->set_material(matte_ptr1);
+		box_ptr1->set_material(matte_ptr1->clone());
 		add_object(box_ptr1);
 
 		Box* box_ptr2 = new Box(Point3D(0.5 * gap, 0.0, -0.5 * box_depth),
 			Point3D(0.5 * gap + box_width, box_height, 0.5 * box_depth));
-		box_ptr2->set_material(matte_ptr1);
+		box_ptr2->set_material(matte_ptr1->clone());
 		add_object(box_ptr2);
 
+		//microfacet mat
+		SV_GlossyFacet *p_glossy_facet = new SV_GlossyFacet();
+		p_glossy_facet->set_cd(red);
+		p_glossy_facet->set_roughness(1.0);
+		p_glossy_facet->set_reflectance(0.1);
+		p_glossy_facet->set_sampler(new MultiJittered(num_samples));
 		Box* box_ptr3 = new Box(Point3D(1.5 * gap + box_width, 0.0, -0.5 * box_depth),
 			Point3D(1.5 * gap + 2.0 * box_width, box_height, 0.5 * box_depth));
-		box_ptr3->set_material(matte_ptr1);
+		box_ptr3->set_material(p_glossy_facet);
 		add_object(box_ptr3);
 
 

@@ -330,6 +330,12 @@
     <ClCompile Include="raytracer\GeometricObjects\OpenCylinder.cpp">
       <Filter>Geometric Objects</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\Microfacet.cpp">
+      <Filter>BRDFs</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\SV_GlossyFacet.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -622,6 +628,12 @@
     </ClInclude>
     <ClInclude Include="raytracer\GeometricObjects\OpenCylinder.h">
       <Filter>Geometric Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BRDFs\Microfacet.h">
+      <Filter>BRDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\SV_GlossyFacet.h">
+      <Filter>Materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

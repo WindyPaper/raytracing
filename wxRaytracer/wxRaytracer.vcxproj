@@ -146,6 +146,7 @@
     <ClCompile Include="raytracer\BRDFs\Lambertian.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\Microfacet.cpp" />
     <ClCompile Include="raytracer\BRDFs\PerfectSpecular.cpp" />
     <ClCompile Include="raytracer\BTDFs\BTDF.cpp" />
     <ClCompile Include="raytracer\BTDFs\PerfectTransmitter.cpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="raytracer\Materials\Reflective.cpp" />
     <ClCompile Include="raytracer\Materials\SphereMaterials.cpp" />
     <ClCompile Include="raytracer\Materials\SV_Emissive.cpp" />
+    <ClCompile Include="raytracer\Materials\SV_GlossyFacet.cpp" />
     <ClCompile Include="raytracer\Materials\SV_GlossyReflector.cpp" />
     <ClCompile Include="raytracer\Materials\SV_GlossySpecular.cpp" />
     <ClCompile Include="raytracer\Materials\SV_Lambertian.cpp" />
@@ -291,6 +293,7 @@
     <ClInclude Include="raytracer\BRDFs\FresnelTransmitter.h" />
     <ClInclude Include="raytracer\BRDFs\GlossySpecular.h" />
     <ClInclude Include="raytracer\BRDFs\Lambertian.h" />
+    <ClInclude Include="raytracer\BRDFs\Microfacet.h" />
     <ClInclude Include="raytracer\BRDFs\PerfectSpecular.h" />
     <ClInclude Include="raytracer\BTDFs\BTDF.h" />
     <ClInclude Include="raytracer\BTDFs\PerfectTransmitter.h" />
@@ -337,6 +340,7 @@
     <ClInclude Include="raytracer\Materials\Reflective.h" />
     <ClInclude Include="raytracer\Materials\SphereMaterials.h" />
     <ClInclude Include="raytracer\Materials\SV_Emissive.h" />
+    <ClInclude Include="raytracer\Materials\SV_GlossyFacet.h" />
     <ClInclude Include="raytracer\Materials\SV_GlossyReflector.h" />
     <ClInclude Include="raytracer\Materials\SV_GlossySpecular.h" />
     <ClInclude Include="raytracer\Materials\SV_Lambertian.h" />
