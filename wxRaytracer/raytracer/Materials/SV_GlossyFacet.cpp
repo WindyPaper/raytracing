@@ -1,6 +1,7 @@
 #include "SV_GlossyFacet.h"
 #include "pre_define.h"
 #include "Microfacet.h"
+#include <algorithm>
 
 SV_GlossyFacet::SV_GlossyFacet() :
 	Material(),
@@ -64,9 +65,9 @@ void SV_GlossyFacet::set_roughness(const float val)
 	_p_glossy_brdf->set_roughness(val);
 }
 
-void SV_GlossyFacet::set_reflectance(const float val)
+void SV_GlossyFacet::set_ior(const float val)
 {
-	_p_glossy_brdf->set_reflect_val(val);
+	_p_glossy_brdf->set_ior(val);
 }
 
 RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
@@ -75,12 +76,12 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 	Vector3D wo = -sr.ray.d;
 	float pdf;
 	RGBColor f = _p_glossy_brdf->sample_f(sr, wo, wi, pdf);
-	float ndotwi = sr.normal * wi;
+	float ndotwi = std::max(0.0, sr.normal * wi);
 	Ray reflected_ray(sr.hit_point, wi);
 
 	//shadow ray
 	RGBColor light_l = 0.0f;
-	int light_sampler_num = 16;
+	int light_sampler_num = 4;
 
 	for (int sample_num = 0; sample_num < light_sampler_num; ++sample_num)
 	{
@@ -102,14 +103,19 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 
 				if (is_in_shadow == false)
 				{
-					light_l += l->L(sr) * l->G(sr) * l_ndotwi / l->pdf(sr);
+					light_l += _p_glossy_brdf->f(sr, wo, light_wi) * l->L(sr) * l->G(sr) * l_ndotwi / l->pdf(sr);
 				}
 			}
 		}
 	}
 	light_l /= light_sampler_num;
 
-	return (f * (sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) + light_l) * ndotwi / pdf);
+	if (pdf < 0.0000000001)
+	{
+		pdf = 0.0000000001;
+	}
+
+	return (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf + light_l);
 }
 
 void SV_GlossyFacet::set_sampler(Sampler* sPtr)

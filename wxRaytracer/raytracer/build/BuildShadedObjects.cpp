@@ -54,9 +54,9 @@
 void 												
 World::build(void) {
 
-	int num_samples = 16;
+	int num_samples = 64;
 
-	int sample_type = 5;
+	int sample_type = 6;
 
 	switch (sample_type)
 	{
@@ -627,7 +627,7 @@ World::build(void) {
 		tracer_ptr = new PathTrace(this);
 
 		Pinhole* camera = new Pinhole;
-		camera->set_eye(-20, 10, 20);
+		camera->set_eye(20, 10,  20);
 		camera->set_lookat(0, 2, 0);
 		camera->set_view_distance(1080);
 		camera->compute_uvw();
@@ -635,7 +635,7 @@ World::build(void) {
 
 
 		Emissive* emissive_ptr = new Emissive;
-		emissive_ptr->scale_radiance(40.0);
+		emissive_ptr->scale_radiance(4.0);
 		emissive_ptr->set_ce(white);
 
 
@@ -645,24 +645,35 @@ World::build(void) {
 		float height = 4.0;
 		//	float width = 2.0;				// for Figure 18.4(c)
 		//	float height = 2.0;
-		Point3D center(0.0, 7.0, -7.0);	// center of each area light (rectangular, disk, and spherical)
-		Point3D p0(-0.5 * width, center.y - 0.5 * height, center.z);
-		Vector3D a(width, 0.0, 0.0);
-		Vector3D b(0.0, height, 0.0);
-		Normal normal(0, 0, 1);
 
-		TRectangle* rectangle_ptr = new TRectangle(p0, a, b, normal);
-		rectangle_ptr->set_material(emissive_ptr);
-		rectangle_ptr->set_sampler(sampler_ptr);
-		rectangle_ptr->set_shadows(false);
-		add_object(rectangle_ptr);
+		Point3D p0;
+		Vector3D a, b;
+		Normal normal;
+
+		//p0 = Point3D(21.3, height - 0.001, 22.7);
+		p0 = Point3D(-3, 8, 0);
+		a = Vector3D(0.0, 0.0, 10.5);
+		b = Vector3D(13.0, 0.0, 0.0);
+		normal = Normal(0.0, -1.0, 0.0);
+
+		TRectangle* light_ptr = new TRectangle(p0, a, b, normal);
+		light_ptr->set_material(emissive_ptr);
+		light_ptr->set_sampler(new MultiJittered(num_samples));
+		light_ptr->set_shadows(false);
+		//add_object(light_ptr);
 
 
 		AreaLight* area_light_ptr = new AreaLight;
-		area_light_ptr->set_object(rectangle_ptr);
+		area_light_ptr->set_object(light_ptr);
 		area_light_ptr->set_cast_shadows(true);
 		area_light_ptr->set_material(emissive_ptr);
-		add_light(area_light_ptr);
+		//add_light(area_light_ptr);
+
+		Directional* light_ptr1 = new Directional;
+		light_ptr1->set_direction(20, 40, 20);
+		light_ptr1->scale_radiance(1.0);
+		light_ptr1->set_cast_shadows(true);
+		add_light(light_ptr1);
 
 
 		// Four axis aligned boxes
@@ -686,10 +697,19 @@ World::build(void) {
 		Box* box_ptr1 = new Box(Point3D(-0.5 * gap - box_width, 0.0, -0.5 * box_depth),
 			Point3D(-0.5 * gap, box_height, 0.5 * box_depth));
 		box_ptr1->set_material(matte_ptr1->clone());
-		add_object(box_ptr1);
+		//add_object(box_ptr1);
+		SV_GlossyFacet *p_sphere_glossy_facet = new SV_GlossyFacet();
+		p_sphere_glossy_facet->set_cd(RGBColor(0.4, 0.7, 0.4));
+		p_sphere_glossy_facet->set_roughness(2.0);
+		p_sphere_glossy_facet->set_ior(1.5);
+		p_sphere_glossy_facet->set_sampler(new MultiJittered(num_samples));
+		Sphere *sphere_ptr = new Sphere(Point3D(-0.5 * gap, 2.0, -0.5), 2.0);
+		sphere_ptr->set_material(p_sphere_glossy_facet);
+		add_object(sphere_ptr);
+		
 
 		Box* box_ptr2 = new Box(Point3D(0.5 * gap, 0.0, -0.5 * box_depth),
-			Point3D(0.5 * gap + box_width, box_height, 0.5 * box_depth));
+			Point3D(0.5 * gap + box_width, box_height, 0.5 * box_depth) );
 		box_ptr2->set_material(matte_ptr1->clone());
 		add_object(box_ptr2);
 
@@ -697,7 +717,7 @@ World::build(void) {
 		SV_GlossyFacet *p_glossy_facet = new SV_GlossyFacet();
 		p_glossy_facet->set_cd(red);
 		p_glossy_facet->set_roughness(1.0);
-		p_glossy_facet->set_reflectance(0.1);
+		p_glossy_facet->set_ior(1.5);
 		p_glossy_facet->set_sampler(new MultiJittered(num_samples));
 		Box* box_ptr3 = new Box(Point3D(1.5 * gap + box_width, 0.0, -0.5 * box_depth),
 			Point3D(1.5 * gap + 2.0 * box_width, box_height, 0.5 * box_depth));
@@ -716,6 +736,285 @@ World::build(void) {
 		Plane* plane_ptr = new Plane(Point3D(0.0), Normal(0, 1, 0));
 		plane_ptr->set_material(matte_ptr2);
 		add_object(plane_ptr);
+	}
+	break;
+	case 6: //Test microfacet mat
+	{
+		vp.set_hres(400);
+		vp.set_vres(400);
+		vp.set_samples(num_samples);
+		vp.set_max_depth(5);
+
+		tracer_ptr = new PathTrace(this);
+
+		background_color = black;
+
+		Pinhole* pinhole_ptr = new Pinhole;
+		pinhole_ptr->set_eye(1, 4, 5);
+		pinhole_ptr->set_lookat(0, -0.35, 0);
+		pinhole_ptr->set_view_distance(900);
+		pinhole_ptr->compute_uvw();
+		set_camera(pinhole_ptr);
+
+		PointLight* light_ptr1 = new PointLight;
+		light_ptr1->set_position(Point3D(20, 15, 15));
+		light_ptr1->set_radiance(30.0);
+		light_ptr1->set_cast_shadows(true);
+		add_light(light_ptr1);
+
+		/*Directional* dir_ptr = new Directional;
+		dir_ptr->set_direction(20, 40, 20);
+		dir_ptr->scale_radiance(1.0);
+		dir_ptr->set_cast_shadows(true);
+		add_light(dir_ptr);*/
+
+		SV_GlossyFacet *p_sphere_glossy_facet = new SV_GlossyFacet();
+		p_sphere_glossy_facet->set_cd(RGBColor(0.4, 0.7, 0.4));
+		p_sphere_glossy_facet->set_roughness(0.8);
+		p_sphere_glossy_facet->set_ior(1.5);
+		p_sphere_glossy_facet->set_sampler(new MultiJittered(num_samples));
+		Sphere *sphere_ptr = new Sphere(Point3D(0, 0.5, 0), 0.5);
+		sphere_ptr->set_material(p_sphere_glossy_facet);
+		add_object(sphere_ptr);
+
+		Matte* matte_ptr2 = new Matte;
+		matte_ptr2->set_ka(0.1);
+		matte_ptr2->set_kd(0.90);
+		matte_ptr2->set_cd(white * 0.5);
+		matte_ptr2->set_sampler(new MultiJittered(num_samples));
+
+		Plane* plane_ptr = new Plane(Point3D(0.0), Normal(0, 1, 0));
+		plane_ptr->set_material(matte_ptr2);
+		add_object(plane_ptr);
+	}
+	break;
+	case 7://cornell room
+	{
+		vp.set_hres(400);
+		vp.set_vres(400);
+		vp.set_samples(num_samples);
+		vp.set_max_depth(5);
+
+		background_color = black;
+
+		tracer_ptr = new PathTrace(this);
+
+		Pinhole* pinhole_ptr = new Pinhole;
+		pinhole_ptr->set_eye(27.6, 27.4, -80.0);
+		pinhole_ptr->set_lookat(27.6, 27.4, 0.0);
+		pinhole_ptr->set_view_distance(400);
+		pinhole_ptr->compute_uvw();
+		set_camera(pinhole_ptr);
+
+
+		Point3D p0;
+		Vector3D a, b;
+		Normal normal;
+
+		// box dimensions
+
+		double width = 55.28;   	// x direction
+		double height = 54.88;  	// y direction
+		double depth = 55.92;	// z direction
+
+
+								// the ceiling light - doesn't need samples
+
+		Emissive* emissive_ptr = new Emissive;
+		emissive_ptr->set_ce(1.0, 0.73, 0.4);
+		emissive_ptr->scale_radiance(20);
+
+		p0 = Point3D(21.3, height - 0.001, 22.7);
+		a = Vector3D(0.0, 0.0, 10.5);
+		b = Vector3D(13.0, 0.0, 0.0);
+		normal = Normal(0.0, -1.0, 0.0);
+		TRectangle* light_ptr = new TRectangle(p0, a, b, normal);
+		light_ptr->set_sampler(new MultiJittered(num_samples));
+		light_ptr->set_shadows(false);
+		//light_ptr->set_material(emissive_ptr);
+		//add_object(light_ptr);
+		AreaLight* ceiling_light_ptr = new AreaLight;
+		ceiling_light_ptr->set_object(light_ptr);
+		ceiling_light_ptr->set_cast_shadows(true);
+		ceiling_light_ptr->set_material(emissive_ptr);
+		add_light(ceiling_light_ptr);
+
+
+		// left wall
+
+		Matte* matte_ptr1 = new Matte;
+		matte_ptr1->set_ka(0.0);
+		matte_ptr1->set_kd(0.6);
+		matte_ptr1->set_cd(0.57, 0.025, 0.025);	 // red
+		matte_ptr1->set_sampler(new MultiJittered(num_samples));
+
+		p0 = Point3D(width, 0.0, 0.0);
+		a = Vector3D(0.0, 0.0, depth);
+		b = Vector3D(0.0, height, 0.0);
+		normal = Normal(-1.0, 0.0, 0.0);
+		TRectangle* left_wall_ptr = new TRectangle(p0, a, b, normal);
+		left_wall_ptr->set_material(matte_ptr1);
+		add_object(left_wall_ptr);
+
+
+		// right wall
+
+		Matte* matte_ptr2 = new Matte;
+		matte_ptr2->set_ka(0.0);
+		matte_ptr2->set_kd(0.6);
+		matte_ptr2->set_cd(0.37, 0.59, 0.2);	 // green   from Photoshop
+		matte_ptr2->set_sampler(new MultiJittered(num_samples));
+
+		p0 = Point3D(0.0, 0.0, 0.0);
+		a = Vector3D(0.0, 0.0, depth);
+		b = Vector3D(0.0, height, 0.0);
+		normal = Normal(1.0, 0.0, 0.0);
+		TRectangle* right_wall_ptr = new TRectangle(p0, a, b, normal);
+		right_wall_ptr->set_material(matte_ptr2);
+		add_object(right_wall_ptr);
+
+
+		// back wall
+
+		Matte* matte_ptr3 = new Matte;
+		matte_ptr3->set_ka(0.0);
+		matte_ptr3->set_kd(0.6);
+		matte_ptr3->set_cd(1.0);	 // white
+		matte_ptr3->set_sampler(new MultiJittered(num_samples));
+
+		p0 = Point3D(0.0, 0.0, depth);
+		a = Vector3D(width, 0.0, 0.0);
+		b = Vector3D(0.0, height, 0.0);
+		normal = Normal(0.0, 0.0, -1.0);
+		TRectangle* back_wall_ptr = new TRectangle(p0, a, b, normal);
+		back_wall_ptr->set_material(matte_ptr3);
+		add_object(back_wall_ptr);
+
+
+		// floor
+
+		p0 = Point3D(0.0, 0.0, 0.0);
+		a = Vector3D(0.0, 0.0, depth);
+		b = Vector3D(width, 0.0, 0.0);
+		normal = Normal(0.0, 1.0, 0.0);
+		TRectangle* floor_ptr = new TRectangle(p0, a, b, normal);
+		floor_ptr->set_material(matte_ptr3);
+		add_object(floor_ptr);
+
+
+		// ceiling
+
+		p0 = Point3D(0.0, height, 0.0);
+		a = Vector3D(0.0, 0.0, depth);
+		b = Vector3D(width, 0.0, 0.0);
+		normal = Normal(0.0, -1.0, 0.0);
+		TRectangle* ceiling_ptr = new TRectangle(p0, a, b, normal);
+		ceiling_ptr->set_material(matte_ptr3);
+		add_object(ceiling_ptr);
+
+
+		// the two boxes defined as 5 rectangles each
+
+		// short box
+
+		// top
+
+		p0 = Point3D(13.0, 16.5, 6.5);
+		a = Vector3D(-4.8, 0.0, 16.0);
+		b = Vector3D(16.0, 0.0, 4.9);
+		normal = Normal(0.0, 1.0, 0.0);
+		TRectangle* short_top_ptr = new TRectangle(p0, a, b, normal);
+		short_top_ptr->set_material(matte_ptr3);
+		add_object(short_top_ptr);
+
+
+		// side 1
+
+		p0 = Point3D(13.0, 0.0, 6.5);
+		a = Vector3D(-4.8, 0.0, 16.0);
+		b = Vector3D(0.0, 16.5, 0.0);
+		TRectangle* short_side_ptr1 = new TRectangle(p0, a, b);
+		short_side_ptr1->set_material(matte_ptr3);
+		add_object(short_side_ptr1);
+
+
+		// side 2
+
+		p0 = Point3D(8.2, 0.0, 22.5);
+		a = Vector3D(15.8, 0.0, 4.7);
+		TRectangle* short_side_ptr2 = new TRectangle(p0, a, b);
+		short_side_ptr2->set_material(matte_ptr3);
+		add_object(short_side_ptr2);
+
+
+		// side 3
+
+		p0 = Point3D(24.2, 0.0, 27.4);
+		a = Vector3D(4.8, 0.0, -16.0);
+		TRectangle* short_side_ptr3 = new TRectangle(p0, a, b);
+		short_side_ptr3->set_material(matte_ptr3);
+		add_object(short_side_ptr3);
+
+
+		// side 4
+
+		p0 = Point3D(29.0, 0.0, 11.4);
+		a = Vector3D(-16.0, 0.0, -4.9);
+		TRectangle* short_side_ptr4 = new TRectangle(p0, a, b);
+		short_side_ptr4->set_material(matte_ptr3);
+		add_object(short_side_ptr4);
+
+
+
+
+		// tall box
+
+		// top
+
+		p0 = Point3D(42.3, 33.0, 24.7);
+		a = Vector3D(-15.8, 0.0, 4.9);
+		b = Vector3D(4.9, 0.0, 15.9);
+		normal = Normal(0.0, 1.0, 0.0);
+		TRectangle* tall_top_ptr = new TRectangle(p0, a, b, normal);
+		tall_top_ptr->set_material(matte_ptr3);
+		add_object(tall_top_ptr);
+
+
+		// side 1
+
+		p0 = Point3D(42.3, 0.0, 24.7);
+		a = Vector3D(-15.8, 0.0, 4.9);
+		b = Vector3D(0.0, 33.0, 0.0);
+		TRectangle* tall_side_ptr1 = new TRectangle(p0, a, b);
+		tall_side_ptr1->set_material(matte_ptr3);
+		add_object(tall_side_ptr1);
+
+
+		// side 2
+
+		p0 = Point3D(26.5, 0.0, 29.6);
+		a = Vector3D(4.9, 0.0, 15.9);
+		TRectangle* tall_side_ptr2 = new TRectangle(p0, a, b);
+		tall_side_ptr2->set_material(matte_ptr3);
+		add_object(tall_side_ptr2);
+
+
+		// side 3
+
+		p0 = Point3D(31.4, 0.0, 45.5);
+		a = Vector3D(15.8, 0.0, -4.9);
+		TRectangle* tall_side_ptr3 = new TRectangle(p0, a, b);
+		tall_side_ptr3->set_material(matte_ptr3);
+		add_object(tall_side_ptr3);
+
+
+		// side 4
+
+		p0 = Point3D(47.2, 0.0, 40.6);
+		a = Vector3D(-4.9, 0.0, -15.9);
+		TRectangle* tall_side_ptr4 = new TRectangle(p0, a, b);
+		tall_side_ptr4->set_material(matte_ptr3);
+		add_object(tall_side_ptr4);		
 	}
 	break;
 	default:

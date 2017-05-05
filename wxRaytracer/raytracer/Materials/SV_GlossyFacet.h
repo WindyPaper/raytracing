@@ -28,7 +28,7 @@ public:
 
 	void set_cd(const RGBColor &color);
 	void set_roughness(const float val);
-	void set_reflectance(const float val);
+	void set_ior(const float val);
 
 	virtual RGBColor
 		path_shade(ShadeRec& sr);

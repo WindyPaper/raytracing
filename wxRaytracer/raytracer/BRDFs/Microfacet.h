@@ -21,7 +21,7 @@ public:
 	virtual Microfacet*
 		clone(void) const;
 
-	void set_reflect_val(const float val);
+	void set_ior(const float val);
 	void set_cd(const RGBColor &color);
 	void set_roughness(const float val);
 
@@ -35,6 +35,6 @@ private:
 	DistributionType d_type;
 
 	RGBColor cd;
-	float refletance;
+	float ior;
 	float roughness;
 };

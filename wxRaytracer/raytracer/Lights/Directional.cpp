@@ -56,7 +56,7 @@ Directional::~Directional(void) {}
 
 Vector3D								
 Directional::get_direction(ShadeRec& sr) {
-	return (-dir); //书里面这个dir是正的，这里我将它取反了
+	return (dir); //书里面这个dir是正的，这里我将它取反了
 }	
 
 // ------------------------------------------------------------------------------  L
