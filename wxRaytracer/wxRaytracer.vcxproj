@@ -148,7 +148,9 @@
     </ClCompile>
     <ClCompile Include="raytracer\BRDFs\Microfacet.cpp" />
     <ClCompile Include="raytracer\BRDFs\PerfectSpecular.cpp" />
+    <ClCompile Include="raytracer\BSDF\BSDF.cpp" />
     <ClCompile Include="raytracer\BTDFs\BTDF.cpp" />
+    <ClCompile Include="raytracer\BTDFs\MicfacetBTDF.cpp" />
     <ClCompile Include="raytracer\BTDFs\PerfectTransmitter.cpp" />
     <ClCompile Include="raytracer\build\BuildShadedObjects.cpp" />
     <ClCompile Include="raytracer\Cameras\Camera.cpp">
@@ -295,7 +297,9 @@
     <ClInclude Include="raytracer\BRDFs\Lambertian.h" />
     <ClInclude Include="raytracer\BRDFs\Microfacet.h" />
     <ClInclude Include="raytracer\BRDFs\PerfectSpecular.h" />
+    <ClInclude Include="raytracer\BSDF\BSDF.h" />
     <ClInclude Include="raytracer\BTDFs\BTDF.h" />
+    <ClInclude Include="raytracer\BTDFs\MicfacetBTDF.h" />
     <ClInclude Include="raytracer\BTDFs\PerfectTransmitter.h" />
     <ClInclude Include="raytracer\Cameras\Camera.h" />
     <ClInclude Include="raytracer\Cameras\FishEye.h" />

@@ -49,6 +49,9 @@
     <Filter Include="Thread">
       <UniqueIdentifier>{d8c82ddf-c85d-40a1-9528-5b07623fc074}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BSDFs">
+      <UniqueIdentifier>{1d63b9e9-28ef-49e8-822b-4e2b3ca86e96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="raytracer\BRDFs\BRDF.cpp">
@@ -335,6 +338,12 @@
     </ClCompile>
     <ClCompile Include="raytracer\Materials\SV_GlossyFacet.cpp">
       <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\BSDF\BSDF.cpp">
+      <Filter>BSDFs</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\BTDFs\MicfacetBTDF.cpp">
+      <Filter>BTDFs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -634,6 +643,12 @@
     </ClInclude>
     <ClInclude Include="raytracer\Materials\SV_GlossyFacet.h">
       <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BSDF\BSDF.h">
+      <Filter>BSDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BTDFs\MicfacetBTDF.h">
+      <Filter>BTDFs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

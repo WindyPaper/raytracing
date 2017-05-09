@@ -40,6 +40,12 @@ void Microfacet::set_roughness(const float val)
 
 RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi) const
 {
+	if (sr.normal * wo < 0.0 ||
+		sr.normal * wi < 0.0)
+	{
+		return 0;
+	}
+
 	//Schlick approximation
 	Vector3D h(wo + wi);
 	h.normalize();
@@ -47,24 +53,41 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 	f0 = f0 * f0;
 	double fresnel = f0 + (1.0f - f0) * std::powf((1.0 - (h * wi)), 5);
 
-	//Blinn  type
-	double g_reach_view = 1.0;
+	//Blinn  type G
+	/*double g_reach_view = 1.0;
 	double g_block_after_reflect = 2 * (sr.normal * h) * (sr.normal * wo) / (wo * h);
 	double g_block_before_reach = 2 * (sr.normal * h) * (sr.normal * wi) / (wo * h);
-	double g_term = std::min({ g_reach_view, g_block_after_reflect, g_block_before_reach });
+	double g_term = std::min({ g_reach_view, g_block_after_reflect, g_block_before_reach });*/
+	//Schlick approximation G
+	double a = 1 / (roughness * std::tan(std::acos(wo * sr.normal)));
+	double px = (wo * h / (wo * sr.normal)) > 0.000 ? 1.0 : 0.0;
+	if (std::isinf(px))
+	{
+		px = 0.0;
+	}
+	double g_term = 1.0;
+	if (a < 1.6)
+	{
+		g_term = px * (3.535 * a + 2.181 * a * a) / (1 + 2.276 * a + 2.577 * a * a);
+	}
 
 	//Beckmanns
 	double n_dot_h = std::max(0.0, sr.normal * h);
+	if (n_dot_h < 0.00000001)
+	{
+		return 0;
+	}
 	double n_dot_h_2 = n_dot_h * n_dot_h;
 	double roughness_2 = roughness * roughness;
 	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
 	double d = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow);
 
 	double f = fresnel * g_term * d / (4 * std::max(0.0, (sr.normal * wi)) * std::max(0.0, (sr.normal * wo)));
-
+	
 	if (std::isnan(f))
 	{
 		printf("Microfacet f is NAN!\n");
+		f = 0.0;
 	}
 	return f * cd;
 }
@@ -80,8 +103,12 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	float rand0_1 = rand_float();
 	float theta = std::atan(std::sqrt((-roughness_2 * std::log(1 - rand0_1))));
 	float phi = rand_float(0, 2 * PI);
-	wi = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
-	wi = wi.x * u + wi.y * v + wi.z * w;
+	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
+	m = m.x * u + m.y * v + m.z * w; // to world space
+	m.normalize();
+	float ndotwo = std::max(0.0, wo * m);
+	wi = -wo + 2.0 * m * ndotwo;
+	//wi = wi.x * u + wi.y * v + wi.z * w;
 	wi.normalize();
 	if (std::isnan(wi.x) || std::isnan(wi.y) || std::isnan(wi.z))
 	{
@@ -92,13 +119,20 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	Vector3D h(wo + wi);
 	h.normalize();
 	double n_dot_h = std::max(0.0, sr.normal * h);
+	if (n_dot_h < 0.000001)
+	{
+		return 0;
+	}
 	double n_dot_h_2 = n_dot_h * n_dot_h;
 	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
-	pdf = 2 * std::sinf(theta) / (roughness_2 * std::powf(std::cos(theta), 3)) * std::expf(exp_pow);
+	//pdf = 2 * std::sinf(theta) / (roughness_2 * std::powf(std::cos(theta), 3)) * std::expf(exp_pow);
+	//pdf = 1.0f / (PI * roughness_2* roughness_2* n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow) * std::abs(m * sr.normal);
+	pdf = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow) * std::abs(m * sr.normal);
 
-	if (std::isinf(pdf))
+	if (std::isinf(pdf) ||
+		std::isnan(pdf))
 	{
-		pdf = 0.000001;
+		pdf = 1.0;
 	}
 
 	return f(sr, wo, wi);

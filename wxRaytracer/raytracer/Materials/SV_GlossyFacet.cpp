@@ -74,8 +74,8 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 {
 	Vector3D wi;
 	Vector3D wo = -sr.ray.d;
-	float pdf;
-	RGBColor f = _p_glossy_brdf->sample_f(sr, wo, wi, pdf);
+	float pdf =  0.0;
+	RGBColor f = _p_glossy_brdf->sample_f(sr, wo, wi, pdf);	
 	float ndotwi = std::max(0.0, sr.normal * wi);
 	Ray reflected_ray(sr.hit_point, wi);
 
@@ -112,7 +112,7 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 
 	if (pdf < 0.0000000001)
 	{
-		pdf = 0.0000000001;
+		pdf = 0.000001;
 	}
 
 	return (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf + light_l);

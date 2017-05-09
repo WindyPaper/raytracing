@@ -57,7 +57,7 @@ RGBColor
 PerfectSpecular::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& wi, float& pdf) const {
 	float ndotwo = sr.normal * wo;
 	wi = -wo + 2.0 * sr.normal * ndotwo; 
-	pdf = fabs(sr.normal * wi);
+	pdf = fabs(sr.normal * wi);  //cancel out cos(theta) in render equation
 	return (kr * cr);  
 }
 

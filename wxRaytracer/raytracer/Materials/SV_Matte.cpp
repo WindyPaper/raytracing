@@ -7,6 +7,7 @@
 #include "SV_Matte.h"
 
 #include "Light.h"
+#include <algorithm>
 
 // ---------------------------------------------------------------- default constructor
 
@@ -168,13 +169,50 @@ SV_Matte::area_light_shade(ShadeRec& sr)
 
 RGBColor							
 SV_Matte::path_shade(ShadeRec& sr) {
-	Vector3D 	wo = -sr.ray.d;
-	Vector3D 	wi;
-	RGBColor 	f = diffuse_brdf->sample_f(sr, wo, wi);   
-	float 		ndotwi = sr.normal * wi;
-	Ray 		reflected_ray(sr.hit_point, wi);
-	
-	return (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi);
+	Vector3D wi;
+	Vector3D wo = -sr.ray.d;
+	float pdf;
+	RGBColor f = diffuse_brdf->sample_f(sr, wo, wi, pdf);
+	float ndotwi = std::max(0.0, sr.normal * wi);
+	Ray reflected_ray(sr.hit_point, wi);
+
+	//shadow ray
+	RGBColor light_l = 0.0f;
+	int light_sampler_num = 16;
+
+	for (int sample_num = 0; sample_num < light_sampler_num; ++sample_num)
+	{
+		int num_lights = sr.w.lights.size();
+		for (int i = 0; i < num_lights; ++i)
+		{
+			Light *l = sr.w.lights[i];
+
+			Vector3D light_wi = l->get_direction(sr);
+			float l_ndotwi = sr.normal * light_wi;
+			if (l_ndotwi > 0.0f)
+			{
+				bool is_in_shadow = false;
+				if (l->casts_shadows())
+				{
+					Ray shadow_ray(sr.hit_point, light_wi);
+					is_in_shadow = l->in_shadow(shadow_ray, sr);
+				}
+
+				if (is_in_shadow == false)
+				{
+					light_l += l->L(sr) * l->G(sr) * l_ndotwi / l->pdf(sr);
+				}
+			}
+		}
+	}
+	light_l /= light_sampler_num;
+
+	if (pdf < 0.0000000001)
+	{
+		pdf = 0.0000000001;
+	}
+
+	return (f * (sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) + light_l) * ndotwi / pdf);
 }
 
 RGBColor							
