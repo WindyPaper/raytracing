@@ -1,5 +1,5 @@
 #include "Microfacet.h"
-#include <algorithm>
+#include "Util.h"
 
 Microfacet::Microfacet() :
 	BRDF(),
@@ -61,10 +61,6 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 	//Schlick approximation G
 	double a = 1 / (roughness * std::tan(std::acos(wo * sr.normal)));
 	double px = (wo * h / (wo * sr.normal)) > 0.000 ? 1.0 : 0.0;
-	if (std::isinf(px))
-	{
-		px = 0.0;
-	}
 	double g_term = 1.0;
 	if (a < 1.6)
 	{
@@ -84,7 +80,7 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 
 	double f = fresnel * g_term * d / (4 * std::max(0.0, (sr.normal * wi)) * std::max(0.0, (sr.normal * wo)));
 	
-	if (std::isnan(f))
+	if (!is_scalar_valid(f))
 	{
 		printf("Microfacet f is NAN!\n");
 		f = 0.0;
@@ -108,7 +104,6 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	m.normalize();
 	float ndotwo = std::max(0.0, wo * m);
 	wi = -wo + 2.0 * m * ndotwo;
-	//wi = wi.x * u + wi.y * v + wi.z * w;
 	wi.normalize();
 	if (std::isnan(wi.x) || std::isnan(wi.y) || std::isnan(wi.z))
 	{
@@ -125,8 +120,6 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	}
 	double n_dot_h_2 = n_dot_h * n_dot_h;
 	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
-	//pdf = 2 * std::sinf(theta) / (roughness_2 * std::powf(std::cos(theta), 3)) * std::expf(exp_pow);
-	//pdf = 1.0f / (PI * roughness_2* roughness_2* n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow) * std::abs(m * sr.normal);
 	pdf = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow) * std::abs(m * sr.normal);
 
 	if (std::isinf(pdf) ||

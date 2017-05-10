@@ -110,9 +110,9 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 	}
 	light_l /= light_sampler_num;
 
-	if (pdf < 0.0000000001)
+	if (scalar_is_equal(pdf, 0.0))
 	{
-		pdf = 0.000001;
+		pdf = 0.00001;
 	}
 
 	return (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf + light_l);

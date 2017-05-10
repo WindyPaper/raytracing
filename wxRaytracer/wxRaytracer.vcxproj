@@ -388,6 +388,7 @@
     <ClInclude Include="raytracer\Utilities\Ray.h" />
     <ClInclude Include="raytracer\Utilities\RGBColor.h" />
     <ClInclude Include="raytracer\Utilities\ShadeRec.h" />
+    <ClInclude Include="raytracer\Utilities\Util.h" />
     <ClInclude Include="raytracer\Utilities\Vector3D.h" />
     <ClInclude Include="raytracer\World\ViewPlane.h" />
     <ClInclude Include="raytracer\World\World.h" />

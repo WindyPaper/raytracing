@@ -650,5 +650,8 @@
     <ClInclude Include="raytracer\BTDFs\MicfacetBTDF.h">
       <Filter>BTDFs</Filter>
     </ClInclude>
+    <ClInclude Include="raytracer\Utilities\Util.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

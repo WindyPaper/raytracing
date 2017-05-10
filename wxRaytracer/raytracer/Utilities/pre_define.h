@@ -6,6 +6,6 @@ if (p) \
 { \
 	delete p; \
 	p = 0; \
-} 
+}
 
 #endif

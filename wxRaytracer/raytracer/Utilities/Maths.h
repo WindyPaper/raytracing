@@ -1,10 +1,16 @@
+#pragma once
+
 #ifndef __MATHS__
 #define __MATHS__
 
 #include <math.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 #define PI 3.141592653
+
+#define LOW_EPS (1.0e-5f)
+#define HIGH_EPS (1.0e-30f)
 
 #define INV_RAND_MAX (1.0 / (float)RAND_MAX)
 
@@ -64,6 +70,16 @@ inline float to_degree(float radian)
 static inline double clamp(double value, double low, double high)
 {
 	return value < low ? low : (value > high ? high : value);
+}
+
+inline bool scalar_is_equal(double a, double b)
+{
+	if (std::abs(a - b) < LOW_EPS)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 #endif

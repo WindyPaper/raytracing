@@ -758,7 +758,7 @@ World::build(void) {
 
 		PointLight* light_ptr1 = new PointLight;
 		light_ptr1->set_position(Point3D(20, 15, 15));
-		light_ptr1->set_radiance(30.0);
+		light_ptr1->set_radiance(50.0);
 		light_ptr1->set_cast_shadows(true);
 		add_light(light_ptr1);
 
@@ -770,17 +770,22 @@ World::build(void) {
 
 		SV_GlossyFacet *p_sphere_glossy_facet = new SV_GlossyFacet();
 		p_sphere_glossy_facet->set_cd(RGBColor(0.4, 0.7, 0.4));
-		p_sphere_glossy_facet->set_roughness(0.8);
+		p_sphere_glossy_facet->set_roughness(0.4);
 		p_sphere_glossy_facet->set_ior(1.5);
 		p_sphere_glossy_facet->set_sampler(new MultiJittered(num_samples));
 		Sphere *sphere_ptr = new Sphere(Point3D(0, 0.5, 0), 0.5);
 		sphere_ptr->set_material(p_sphere_glossy_facet);
 		add_object(sphere_ptr);
 
-		Matte* matte_ptr2 = new Matte;
-		matte_ptr2->set_ka(0.1);
-		matte_ptr2->set_kd(0.90);
-		matte_ptr2->set_cd(white * 0.5);
+		Checker3D* checker_ptr = new Checker3D;
+		checker_ptr->set_size(0.5);
+		checker_ptr->set_color1(black);
+		checker_ptr->set_color2(white);
+
+		SV_Matte* matte_ptr2 = new SV_Matte;
+		matte_ptr2->set_ka(0.0);
+		matte_ptr2->set_kd(0.05);
+		matte_ptr2->set_cd(checker_ptr);
 		matte_ptr2->set_sampler(new MultiJittered(num_samples));
 
 		Plane* plane_ptr = new Plane(Point3D(0.0), Normal(0, 1, 0));
