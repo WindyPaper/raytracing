@@ -3,6 +3,7 @@
 #include "Material.h"
 
 class Microfacet;
+class MicrofacetBTDF;
 
 class SV_GlossyFacet : public Material
 {
@@ -38,4 +39,5 @@ public:
 
 private:
 	Microfacet *_p_glossy_brdf;
+	MicrofacetBTDF *_p_glossy_btdf;
 };

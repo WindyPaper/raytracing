@@ -1,18 +1,21 @@
 #include "SV_GlossyFacet.h"
+#include <algorithm>
 #include "pre_define.h"
 #include "Microfacet.h"
-#include <algorithm>
+#include "MicfacetBTDF.h"
 
 SV_GlossyFacet::SV_GlossyFacet() :
 	Material(),
-	_p_glossy_brdf(new Microfacet())
+	_p_glossy_brdf(new Microfacet()),
+	_p_glossy_btdf(new MicrofacetBTDF())
 {
-
+	_p_glossy_btdf->set_ior_in(1.0);
 }
 
 SV_GlossyFacet::SV_GlossyFacet(const SV_GlossyFacet &rhs) :
 	Material(rhs),
-	_p_glossy_brdf(rhs._p_glossy_brdf->clone())
+	_p_glossy_brdf(rhs._p_glossy_brdf->clone()),
+	_p_glossy_btdf(rhs._p_glossy_btdf->clone())
 {
 
 }
@@ -20,6 +23,7 @@ SV_GlossyFacet::SV_GlossyFacet(const SV_GlossyFacet &rhs) :
 SV_GlossyFacet::~SV_GlossyFacet()
 {
 	SAFE_DELETE(_p_glossy_brdf);
+	SAFE_DELETE(_p_glossy_btdf);
 }
 
 Material & SV_GlossyFacet::operator=(const SV_GlossyFacet &rhs)
@@ -63,21 +67,29 @@ void SV_GlossyFacet::set_cd(const RGBColor &color)
 void SV_GlossyFacet::set_roughness(const float val)
 {
 	_p_glossy_brdf->set_roughness(val);
+	_p_glossy_btdf->set_roughness(val);
 }
 
 void SV_GlossyFacet::set_ior(const float val)
 {
 	_p_glossy_brdf->set_ior(val);
+	_p_glossy_btdf->set_ior_out(val);
 }
 
 RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 {
+	RGBColor L = 0;
 	Vector3D wi;
 	Vector3D wo = -sr.ray.d;
 	float pdf =  0.0;
 	RGBColor f = _p_glossy_brdf->sample_f(sr, wo, wi, pdf);	
 	float ndotwi = std::max(0.0, sr.normal * wi);
 	Ray reflected_ray(sr.hit_point, wi);
+
+	//transmitter
+	Vector3D wt;
+	RGBColor tf = _p_glossy_btdf->sample_f(sr, wo, wt);
+	Ray transimit_ray(sr.hit_point, wt);
 
 	//shadow ray
 	RGBColor light_l = 0.0f;
@@ -115,7 +127,10 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 		pdf = 0.00001;
 	}
 
-	return (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf + light_l);
+	L += (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf);
+	L += (tf * sr.w.tracer_ptr->trace_ray(transimit_ray, sr.depth + 1));
+	L += light_l;
+	return L;
 }
 
 void SV_GlossyFacet::set_sampler(Sampler* sPtr)

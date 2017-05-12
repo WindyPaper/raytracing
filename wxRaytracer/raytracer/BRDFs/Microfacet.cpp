@@ -1,12 +1,13 @@
 #include "Microfacet.h"
 #include "Util.h"
+#include "pre_define.h"
 
 Microfacet::Microfacet() :
 	BRDF(),
 	ior(1.5f),
 	roughness(0.0f)
 {
-
+	init_default_param();
 }
 
 Microfacet::Microfacet(const Microfacet &obj) :
@@ -15,7 +16,32 @@ Microfacet::Microfacet(const Microfacet &obj) :
 	roughness(obj.roughness),
 	cd(obj.cd)
 {
+	init_default_param();
+	set_roughness(roughness);
+}
 
+Microfacet::Microfacet(DistributionType type) :
+	BRDF(),
+	ior(1.5f),
+	roughness(0.0f)
+{
+	fresnel = new SchlickApproximationFresnel();
+	g_term = new SchlickGTerm(roughness);
+	distribution = new BeckmanDistribution();
+}
+
+Microfacet::~Microfacet()
+{
+	SAFE_DELETE(fresnel);
+	SAFE_DELETE(g_term);
+	SAFE_DELETE(distribution);
+}
+
+void Microfacet::init_default_param()
+{
+	fresnel = new SchlickApproximationFresnel();
+	g_term = new SchlickGTerm(roughness);
+	distribution = new BeckmanDistribution();
 }
 
 Microfacet* Microfacet::clone(void) const
@@ -36,6 +62,12 @@ void Microfacet::set_cd(const RGBColor &color)
 void Microfacet::set_roughness(const float val)
 {
 	roughness = val;
+
+	SchlickGTerm *s_gterm = dynamic_cast<SchlickGTerm*>(g_term);
+	if (s_gterm)
+	{
+		s_gterm->roughness = val;
+	}
 }
 
 RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi) const
@@ -46,39 +78,14 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 		return 0;
 	}
 
-	//Schlick approximation
 	Vector3D h(wo + wi);
 	h.normalize();
-	double f0 = abs((1.0 - ior) / (1.0 + ior));
-	f0 = f0 * f0;
-	double fresnel = f0 + (1.0f - f0) * std::powf((1.0 - (h * wi)), 5);
+	
+	double fresnel_val = fresnel->val(wi, wo, h, 1.0, ior);
+	double g = g_term->val(wi, wo, sr.normal, h);
+	double d = distribution->val(roughness, sr.normal, h);
 
-	//Blinn  type G
-	/*double g_reach_view = 1.0;
-	double g_block_after_reflect = 2 * (sr.normal * h) * (sr.normal * wo) / (wo * h);
-	double g_block_before_reach = 2 * (sr.normal * h) * (sr.normal * wi) / (wo * h);
-	double g_term = std::min({ g_reach_view, g_block_after_reflect, g_block_before_reach });*/
-	//Schlick approximation G
-	double a = 1 / (roughness * std::tan(std::acos(wo * sr.normal)));
-	double px = (wo * h / (wo * sr.normal)) > 0.000 ? 1.0 : 0.0;
-	double g_term = 1.0;
-	if (a < 1.6)
-	{
-		g_term = px * (3.535 * a + 2.181 * a * a) / (1 + 2.276 * a + 2.577 * a * a);
-	}
-
-	//Beckmanns
-	double n_dot_h = std::max(0.0, sr.normal * h);
-	if (n_dot_h < 0.00000001)
-	{
-		return 0;
-	}
-	double n_dot_h_2 = n_dot_h * n_dot_h;
-	double roughness_2 = roughness * roughness;
-	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
-	double d = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow);
-
-	double f = fresnel * g_term * d / (4 * std::max(0.0, (sr.normal * wi)) * std::max(0.0, (sr.normal * wo)));
+	double f = fresnel_val * g * d / (4 * std::max(0.0, (sr.normal * wi)) * std::max(0.0, (sr.normal * wo)));
 	
 	if (!is_scalar_valid(f))
 	{
@@ -112,15 +119,8 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 
 	//Beckmanns pdf
 	Vector3D h(wo + wi);
-	h.normalize();
-	double n_dot_h = std::max(0.0, sr.normal * h);
-	if (n_dot_h < 0.000001)
-	{
-		return 0;
-	}
-	double n_dot_h_2 = n_dot_h * n_dot_h;
-	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
-	pdf = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow) * std::abs(m * sr.normal);
+	h.normalize();	
+	pdf = distribution->val(roughness, sr.normal, h) * std::abs(m * sr.normal);
 
 	if (std::isinf(pdf) ||
 		std::isnan(pdf))
@@ -139,4 +139,50 @@ Microfacet& Microfacet::operator=(const Microfacet& rhs)
 	ior = rhs.ior;
 
 	return (*this);
+}
+
+double SchlickApproximationFresnel::val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior)
+{
+	double f0 = abs((in_ior - out_ior) / (in_ior + out_ior));
+	f0 = f0 * f0;
+	double fresnel = f0 + (1.0f - f0) * std::powf((1.0 - (h * i)), 5);
+
+	return fresnel;
+}
+
+double BlinnGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
+{
+	double g_reach_view = 1.0;
+	double g_block_after_reflect = 2 * (n * h) * (n * o) / (o * h);
+	double g_block_before_reach = 2 * (n * h) * (n * i) / (o * h);
+	double g_term = std::min({ g_reach_view, g_block_after_reflect, g_block_before_reach });
+	return g_term;
+}
+
+double SchlickGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
+{
+	double a = 1 / (roughness * std::tan(std::acos(o * n)));
+	double px = (o * h / (o * n)) > 0.000 ? 1.0 : 0.0;
+	double g_term = 1.0;
+	if (a < 1.6)
+	{
+		g_term = px * (3.535 * a + 2.181 * a * a) / (1 + 2.276 * a + 2.577 * a * a);
+	}
+
+	return g_term;
+}
+
+double BeckmanDistribution::val(float roughness, Vector3D n, Vector3D h)
+{
+	double n_dot_h = std::max(0.0, n * h);
+	if (n_dot_h < 0.00000001)
+	{
+		return 0;
+	}
+	double n_dot_h_2 = n_dot_h * n_dot_h;
+	double roughness_2 = roughness * roughness;
+	double exp_pow = (n_dot_h_2 - 1) / (roughness_2 * n_dot_h_2);
+	double d = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow);
+
+	return d;
 }
