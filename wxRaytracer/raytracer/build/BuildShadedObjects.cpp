@@ -759,7 +759,7 @@ World::build(void) {
 		PointLight* light_ptr1 = new PointLight;
 		light_ptr1->set_position(Point3D(20, 15, 15));
 		light_ptr1->set_radiance(50.0);
-		light_ptr1->set_cast_shadows(true);
+		light_ptr1->set_cast_shadows(false);
 		add_light(light_ptr1);
 
 		/*Directional* dir_ptr = new Directional;
@@ -770,7 +770,7 @@ World::build(void) {
 
 		SV_GlossyFacet *p_sphere_glossy_facet = new SV_GlossyFacet();
 		p_sphere_glossy_facet->set_cd(RGBColor(0.4, 0.7, 0.4));
-		p_sphere_glossy_facet->set_roughness(0.4);
+		p_sphere_glossy_facet->set_roughness(0.03);
 		p_sphere_glossy_facet->set_ior(1.5);
 		p_sphere_glossy_facet->set_sampler(new MultiJittered(num_samples));
 		Sphere *sphere_ptr = new Sphere(Point3D(0, 0.5, 0), 0.5);
@@ -778,7 +778,7 @@ World::build(void) {
 		add_object(sphere_ptr);
 
 		Checker3D* checker_ptr = new Checker3D;
-		checker_ptr->set_size(0.5);
+		checker_ptr->set_size(0.7);
 		checker_ptr->set_color1(black);
 		checker_ptr->set_color2(white);
 

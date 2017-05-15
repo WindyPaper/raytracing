@@ -20,7 +20,7 @@ public:
 		f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi) const;
 
 	virtual RGBColor
-		sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& wt) const;
+		sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& wt, float &pdf) const;
 
 	void set_ior_in(float val);
 	void set_ior_out(float val);

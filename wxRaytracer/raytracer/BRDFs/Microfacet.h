@@ -15,6 +15,7 @@ struct SchlickApproximationFresnel : public IMFresnel
 struct IVisibleTerm
 {
 	virtual double val(Vector3D i, Vector3D o, Vector3D n, Vector3D h) = 0;
+	virtual void set_roughness(float val) {}
 };
 
 struct BlinnGTerm : public IVisibleTerm
@@ -29,10 +30,36 @@ struct SchlickGTerm : public IVisibleTerm
 	{}
 	virtual double val(Vector3D i, Vector3D o, Vector3D n, Vector3D h);
 
+	virtual void set_roughness(float val)
+	{
+		roughness = val;
+	}
+
 	float roughness;
 
 private:
 	SchlickGTerm();
+};
+
+struct SmithGTerm : public IVisibleTerm
+{
+	SmithGTerm(float rough) :
+		roughness(rough)
+	{}
+
+	virtual double val(Vector3D i, Vector3D o, Vector3D n, Vector3D h);
+
+	//float G1(Vector3D v, Vector3D m, Vector3D n);
+
+	virtual void set_roughness(float val)
+	{
+		roughness = val;
+	}
+
+	float roughness;
+
+private:
+	SmithGTerm();
 };
 
 struct IDistribution
@@ -41,6 +68,11 @@ struct IDistribution
 };
 
 struct BeckmanDistribution : public IDistribution
+{
+	virtual double val(float roughness, Vector3D n, Vector3D h);
+};
+
+struct GGX : public IDistribution
 {
 	virtual double val(float roughness, Vector3D n, Vector3D h);
 };

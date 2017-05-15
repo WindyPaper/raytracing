@@ -82,4 +82,15 @@ inline bool scalar_is_equal(double a, double b)
 	return false;
 }
 
+template<typename T>
+inline int signum(T num)
+{
+	if (num >= 0.00f)
+	{
+		return 1;
+	}
+	
+	return -1;
+}
+
 #endif

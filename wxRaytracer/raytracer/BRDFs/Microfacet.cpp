@@ -61,12 +61,12 @@ void Microfacet::set_cd(const RGBColor &color)
 
 void Microfacet::set_roughness(const float val)
 {
-	roughness = val;
+	roughness = std::max(val, LOW_EPS);
 
 	SchlickGTerm *s_gterm = dynamic_cast<SchlickGTerm*>(g_term);
 	if (s_gterm)
 	{
-		s_gterm->roughness = val;
+		s_gterm->roughness = roughness;
 	}
 }
 
@@ -78,7 +78,8 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 		return 0;
 	}
 
-	Vector3D h(wo + wi);
+	int sign_val = wo * sr.normal >= 0 ? 1 : -1;
+	Vector3D h(sign_val * (wo + wi));
 	h.normalize();
 	
 	double fresnel_val = fresnel->val(wi, wo, h, 1.0, ior);
@@ -118,7 +119,8 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	}
 
 	//Beckmanns pdf
-	Vector3D h(wo + wi);
+	int sign_val = wo * sr.normal >= 0 ? 1 : -1;
+	Vector3D h(sign_val * (wo + wi));
 	h.normalize();	
 	pdf = distribution->val(roughness, sr.normal, h) * std::abs(m * sr.normal);
 
@@ -161,7 +163,7 @@ double BlinnGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
 
 double SchlickGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
 {
-	double a = 1 / (roughness * std::tan(std::acos(o * n)));
+	/*double a = 1 / (roughness * std::tan(std::acos(o * n)));
 	double px = (o * h / (o * n)) > 0.000 ? 1.0 : 0.0;
 	double g_term = 1.0;
 	if (a < 1.6)
@@ -169,13 +171,17 @@ double SchlickGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
 		g_term = px * (3.535 * a + 2.181 * a * a) / (1 + 2.276 * a + 2.577 * a * a);
 	}
 
-	return g_term;
+	return g_term;*/
+	float k = roughness * roughness * 0.5f;
+	float Vis_SchlickV = std::abs(o * n) * (1 - k) + k;
+	float Vis_SchlickL = std::abs(i * n) * (1 - k) + k;
+	return 0.25f / (Vis_SchlickV * Vis_SchlickL);
 }
 
 double BeckmanDistribution::val(float roughness, Vector3D n, Vector3D h)
 {
 	double n_dot_h = std::max(0.0, n * h);
-	if (n_dot_h < 0.00000001)
+	if (n_dot_h < LOW_EPS)
 	{
 		return 0;
 	}
@@ -185,4 +191,47 @@ double BeckmanDistribution::val(float roughness, Vector3D n, Vector3D h)
 	double d = 1.0f / (PI * roughness_2 * n_dot_h_2 * n_dot_h_2) * std::exp(exp_pow);
 
 	return d;
+}
+
+double GGX::val(float roughness, Vector3D n, Vector3D h)
+{
+	/*int m_dot_n = n * h > 0.0f ? 1 : 0;
+	if (m_dot_n == 0)
+	{
+		return 0;
+	}
+
+	float cos_m_4 = std::powf(n * h, 4);
+	float tan_m_2 = 1 / ((n * h) * (n * h)) - 1;
+	float rough_2 = roughness * roughness;
+	float d = rough_2 * m_dot_n / (PI * cos_m_4 * std::powf(rough_2 + tan_m_2, 2));
+	return d;*/
+
+	float m = roughness * roughness;
+	float m_dot_n = n * h;
+	if (m_dot_n < LOW_EPS)
+	{
+		return 0;
+	}
+	float d = (m - 1.0f) * m_dot_n * m_dot_n + 1.0f;
+	if (d < LOW_EPS)
+	{
+		return 0;
+	}
+	return m / (PI*d*d);
+}
+
+double SmithGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
+{
+	int visible = o * h / (o * n) > 0.0f ? 1 : 0;
+	if (visible == 0)
+	{
+		return 0;
+	}
+
+	float tan_o_2 = 1 / (o * h * o * h) - 1;
+	float rough_2 = roughness * roughness;
+
+	float v = visible * 2 / (1 + std::sqrt(1 + rough_2 * tan_o_2));
+	return v;
 }
