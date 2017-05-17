@@ -9,7 +9,7 @@ MicrofacetBTDF::MicrofacetBTDF() :
 {
 	fresnel = new SchlickApproximationFresnel();
 	g_term = new SmithGTerm(roughness);
-	ndf = new GGX();
+	ndf = new BeckmanDistribution();
 }
 
 MicrofacetBTDF::~MicrofacetBTDF()
@@ -132,18 +132,7 @@ RGBColor MicrofacetBTDF::sample_f(const ShadeRec& sr, const Vector3D& wi, Vector
 	//	return 1.0;
 	//}
 
-	Vector3D w = sr.normal;
-	Vector3D v = Vector3D(0.000034, 1.0, 0.00071) ^ w;
-	v.normalize();
-	Vector3D u = v ^ w;
-
-	double roughness_2 = roughness * roughness;
-	float rand0_1 = rand_float();
-	float theta = std::atan(std::sqrt((-roughness_2 * std::log(1 - rand0_1))));
-	float phi = rand_float(0, 2 * PI);
-	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
-	m = m.x * u + m.y * v + m.z * w; // to world space
-	m.normalize();
+	Vector3D m = ndf->d_sample(roughness, sr.normal);
 
 	if (m * sr.normal < -LOW_EPS)
 	{

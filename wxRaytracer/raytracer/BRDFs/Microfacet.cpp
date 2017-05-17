@@ -98,18 +98,7 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 
 RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& wi, float& pdf) const
 {
-	Vector3D w = sr.normal;
-	Vector3D v = Vector3D(0.000034, 1.0, 0.00071) ^ w;
-	v.normalize();
-	Vector3D u = v ^ w;
-
-	double roughness_2 = roughness * roughness;
-	float rand0_1 = rand_float();
-	float theta = std::atan(std::sqrt((-roughness_2 * std::log(1 - rand0_1))));
-	float phi = rand_float(0, 2 * PI);
-	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
-	m = m.x * u + m.y * v + m.z * w; // to world space
-	m.normalize();
+	Vector3D m = distribution->d_sample(roughness, sr.normal);
 	float ndotwo = std::max(0.0, wo * m);
 	wi = -wo + 2.0 * m * ndotwo;
 	wi.normalize();
@@ -224,6 +213,24 @@ double BeckmanDistribution::val(float roughness, Vector3D n, Vector3D h)
 	return d;
 }
 
+Vector3D BeckmanDistribution::d_sample(float roughness, const Vector3D &n)
+{
+	Vector3D w = n;
+	Vector3D v = Vector3D(0.000034, 1.0, 0.00071) ^ w;
+	v.normalize();
+	Vector3D u = v ^ w;
+
+	double roughness_2 = roughness * roughness;
+	float rand0_1 = rand_float();
+	float theta = std::atan(std::sqrt((-roughness_2 * std::log(1 - rand0_1))));
+	float phi = rand_float(0, 2 * PI);
+	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
+	m = m.x * u + m.y * v + m.z * w; // to world space
+	m.normalize();
+	
+	return m;
+}
+
 double GGX::val(float roughness, Vector3D n, Vector3D h)
 {
 	int m_dot_n = n * h > 0.0f ? 1 : 0;
@@ -256,6 +263,24 @@ double GGX::val(float roughness, Vector3D n, Vector3D h)
 	float tanThetaSq = max(1.0f - cosThetaSq, 0.0f) / cosThetaSq;
 	float cosThetaQu = cosThetaSq*cosThetaSq;
 	return alphaSq*(1.0/PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));*/
+}
+
+Vector3D GGX::d_sample(float roughness, const Vector3D &n)
+{
+	Vector3D w = n;
+	Vector3D v = Vector3D(0.000034, 1.0, 0.00071) ^ w;
+	v.normalize();
+	Vector3D u = v ^ w;
+
+	float rand0_1 = rand_float();
+	float theta = std::atan((roughness * std::sqrt(rand0_1)) / std::sqrt(1 - rand0_1));
+	float phi = rand_float(0, 2 * PI);
+
+	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
+	m = m.x * u + m.y * v + m.z * w; // to world space
+	m.normalize();
+
+	return m;
 }
 
 double SmithGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)

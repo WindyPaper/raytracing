@@ -63,16 +63,19 @@ private:
 struct IDistribution
 {
 	virtual double val(float roughness, Vector3D n, Vector3D h) = 0;
+	virtual Vector3D d_sample(float roughness, const Vector3D &n) = 0;
 };
 
 struct BeckmanDistribution : public IDistribution
 {
 	virtual double val(float roughness, Vector3D n, Vector3D h);
+	virtual Vector3D d_sample(float roughness, const Vector3D &n);
 };
 
 struct GGX : public IDistribution
 {
 	virtual double val(float roughness, Vector3D n, Vector3D h);
+	virtual Vector3D d_sample(float roughness, const Vector3D &n);
 };
 
 class Microfacet : public BRDF
