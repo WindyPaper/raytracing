@@ -29,7 +29,6 @@ struct SchlickGTerm : public IVisibleTerm
 		roughness(rough)
 	{}
 	virtual double val(Vector3D i, Vector3D o, Vector3D n, Vector3D h);
-
 	virtual void set_roughness(float val)
 	{
 		roughness = val;
@@ -48,8 +47,7 @@ struct SmithGTerm : public IVisibleTerm
 	{}
 
 	virtual double val(Vector3D i, Vector3D o, Vector3D n, Vector3D h);
-
-	//float G1(Vector3D v, Vector3D m, Vector3D n);
+	float G1(Vector3D v, Vector3D m, Vector3D n);
 
 	virtual void set_roughness(float val)
 	{

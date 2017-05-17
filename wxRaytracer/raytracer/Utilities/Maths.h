@@ -93,4 +93,10 @@ inline int signum(T num)
 	return -1;
 }
 
+template<typename T>
+inline T sqr(T num)
+{
+	return num * num;
+}
+
 #endif
