@@ -9,7 +9,7 @@ MicrofacetBTDF::MicrofacetBTDF() :
 {
 	fresnel = new SchlickApproximationFresnel();
 	g_term = new SmithGTerm(roughness);
-	ndf = new BeckmanDistribution();
+	ndf = new GGX();
 }
 
 MicrofacetBTDF::~MicrofacetBTDF()
@@ -38,100 +38,60 @@ RGBColor MicrofacetBTDF::f(const ShadeRec& sr, const Vector3D& wo, const Vector3
 	//}
 
 	float wi_dot_n = wi * sr.normal;
+	float wo_dot_n = wo * sr.normal;
+
 	float eta = ior_i / ior_o;
 	float eta_i = ior_i;
 	float eta_o = ior_o;
-	Vector3D N = sr.normal;
+	//Vector3D N = sr.normal;
 	if (wi_dot_n < 0) //inside
 	{
 		eta = ior_o / ior_i;
 		eta_i = ior_o;
 		eta_o = ior_i;
-		//N = -N;
-		//h = -h;
 	}
+
+	if (wi_dot_n * wo_dot_n > 0.0) // internal reflection
+	{
+		Vector3D hr = signum(wi * sr.normal) * (wi + wo);
+
+		float fl = fresnel->val(wi, wo, hr, eta_i, eta_o);
+		float g = g_term->val(wi, wo, sr.normal, hr);
+		double d = ndf->val(roughness, sr.normal, hr);
+
+		float fr =fl * g * d / (4 * std::abs(wi_dot_n * wo_dot_n));
+		if (!is_scalar_valid(fr))
+		{
+			//printf("MicracetBRDF f NAN !\n");
+			fr = std::numeric_limits<float>::max();
+		}
+		return clamp(fr, 0, 1);
+	}
+
 	Vector3D h = -(wo + wi * eta);
-	Vector3D ht = h;
 	h.normalize();
 
-	/*h = h * signum(h * sr.normal);
-
-	if (h * N < 0.0)
-	{
-		printf("h * n = %f\n", h * sr.normal);
-	}*/	
-
-	/*double term1 = std::abs(wi * h) * std::abs(wo * h) / (std::abs(wi * sr.normal) * std::abs(wo * sr.normal));
-	double term2 = ior_o * ior_o * (1 - fresnel->val(wi, wo, h, ior_i, ior_o)) *  g_term->val(wi, wo, sr.normal, h) * ndf->val(roughness, sr.normal, h) / \
-		std::pow(ior_i * (wi * h) + ior_o * (wo * h), 2);*/
-
-	//float fs = std::abs(wiDotM*woDotM)*(1.0f - F)*G*D/(sqr(eta*wiDotM + woDotM)*std::abs(wiDotN));
+	//h = h * signum(h * sr.normal);	
 
 	float wi_dot_m = wi * h;
-	float wo_dot_m = wo * h;
-	////float wi_dot_n = wi * sr.normal;
-	//float temp = eta * wi_dot_m + wo_dot_m;
+	float wo_dot_m = wo * h;	
 	float f = fresnel->val(wi, wo, h, eta_i, eta_o);
-	float g = g_term->val(wi, wo, N, h);
-	double d = ndf->val(roughness, N, h);
-	//printf("d = %lf\n", d);
-	//float ret_f_val = std::abs(wi_dot_m * wo_dot_m) * (1.0f - f) * g * d / std::sqrt(eta * wi_dot_m + wo_dot_m) * std::abs(wi_dot_n);
-
-	//float invHt2 = 1 / (ht * ht);
-	//float ret_f_val = (fabsf(wi_dot_m * wo_dot_m) * (eta * eta) * (g * d) * invHt2) / (wo * sr.normal);
-
-	//from paper
-	/*float term1 = std::abs(wi * h) * std::abs(wo * h) / (std::abs(wi * N) * std::abs(wo * N));
-	float t = eta * wi_dot_m + wo_dot_m;
-	float term2 = (1 - f) * g * d / (t * t);
-	float ret_f_val = term1 * term2;*/
-
-	if (d < LOW_EPS)
-	{
-		return 0;
-	}
-
-	float sqrtDenom = wi * h + eta * (wo * h);
-	float t = eta / sqrtDenom;
-	//printf("f = %f\n", f);
-	//float value = (1.0 - f) * g * d * t * t * abs(wi * h) * std::abs(wo * h) * 4.0f;
+	float g = g_term->val(wi, wo, sr.normal, h);
+	double d = ndf->val(roughness, sr.normal, h);	
 
 	float sq = (eta*wi_dot_m + wo_dot_m);
-	float fs = std::abs(wi_dot_m*wo_dot_m)*(1-f)*g*d / (sq * sq * std::abs(wi * N));
-	float value = fs;
-	//printf("term1 * term2 = %f\n", term1 * term2);
+	float value = std::abs(wi_dot_m * wo_dot_m) * (1.0 - f) * g * d / (sq * sq * std::abs(wi_dot_n));
 
-	//printf("val = %f\n", value);
 	if (!is_scalar_valid(value))
 	{
 		printf("MicracetBTDF f NAN !\n");	
 	}
-
-	//if (value < 0.0)
-	//{
-	//	//printf("clamp to 0 \n");
-	//	value = 0;
-	//}
-	//else if (value > 1.0)
-	//{
-	//	value = 1.0;
-	//}
-	//value = std::abs(value);
-	//printf("value = %f\n", value);
 	
-
 	return value;
-	//return 0.5;
 }
 
 RGBColor MicrofacetBTDF::sample_f(const ShadeRec& sr, const Vector3D& wi, Vector3D& wt, float &pdf) const
 {
-	//if (wo * sr.normal < 0.0)
-	//{
-	//	//inside, return
-	//	return 1.0;
-	//}
-
 	Vector3D m = ndf->d_sample(roughness, sr.normal);
 
 	if (m * sr.normal < -LOW_EPS)
@@ -149,7 +109,9 @@ RGBColor MicrofacetBTDF::sample_f(const ShadeRec& sr, const Vector3D& wi, Vector
 		//printf("internal reflection! \n");
 		wt = get_reflection(wi, -m);
 
-		pdf = ndf->val(roughness, sr.normal, m) * std::abs(m * sr.normal);
+		//Vector3D hr = signum(wi * sr.normal) * (wi + wt);
+		float dwh_dwo = 1 / (4 * std::abs(wt * m));
+		pdf = ndf->val(roughness, sr.normal, m) * std::abs(m * sr.normal) * dwh_dwo;
 
 		return f(sr, wi, wt);
 	}
@@ -157,6 +119,10 @@ RGBColor MicrofacetBTDF::sample_f(const ShadeRec& sr, const Vector3D& wi, Vector
 	if (std::isnan(wt.x) || std::isnan(wt.y) || std::isnan(wt.z))
 	{
 		printf("the param of wt nan !\n");
+		if (!is_scalar_valid(pdf))
+		{
+			printf("Invalid pdf %f\n", pdf);
+		}
 	}
 
 	Vector3D h;

@@ -26,7 +26,7 @@ Microfacet::Microfacet(DistributionType type) :
 	roughness(0.0f)
 {
 	fresnel = new SchlickApproximationFresnel();
-	g_term = new SchlickGTerm(roughness);
+	g_term = new SmithGTerm(roughness);
 	distribution = new BeckmanDistribution();
 }
 
@@ -40,8 +40,8 @@ Microfacet::~Microfacet()
 void Microfacet::init_default_param()
 {
 	fresnel = new SchlickApproximationFresnel();
-	g_term = new SchlickGTerm(roughness);
-	distribution = new BeckmanDistribution();
+	g_term = new SmithGTerm(roughness);
+	distribution = new ::GGX();
 }
 
 Microfacet* Microfacet::clone(void) const
@@ -111,7 +111,8 @@ RGBColor Microfacet::sample_f(const ShadeRec& sr, const Vector3D& wo, Vector3D& 
 	int sign_val = wo * sr.normal >= 0 ? 1 : -1;
 	Vector3D h(sign_val * (wo + wi));
 	h.normalize();	
-	pdf = distribution->val(roughness, sr.normal, h) * std::abs(m * sr.normal);
+	float dwh_dwo = 1 / (4 * std::abs(wo * h));
+	pdf = distribution->val(roughness, sr.normal, h) * std::abs(m * sr.normal) * dwh_dwo;
 
 	if (std::isinf(pdf) ||
 		std::isnan(pdf))
@@ -233,7 +234,7 @@ Vector3D BeckmanDistribution::d_sample(float roughness, const Vector3D &n)
 
 double GGX::val(float roughness, Vector3D n, Vector3D h)
 {
-	int m_dot_n = n * h > 0.0f ? 1 : 0;
+	/*int m_dot_n = n * h > 0.0f ? 1 : 0;
 	if (m_dot_n == 0)
 	{
 		return 0;
@@ -243,7 +244,7 @@ double GGX::val(float roughness, Vector3D n, Vector3D h)
 	float tan_m_2 = 1 / ((n * h) * (n * h)) - 1;
 	float rough_2 = roughness * roughness;
 	float d = rough_2 * m_dot_n / (PI * cos_m_4 * std::powf(rough_2 + tan_m_2, 2));
-	return d;
+	return d;*/
 
 	/*float m = roughness * roughness;
 	float m_dot_n = n * h;
@@ -258,11 +259,13 @@ double GGX::val(float roughness, Vector3D n, Vector3D h)
 	}
 	return m / (PI*d*d);*/
 
-	/*float alphaSq = roughness*roughness;
+	if (h * n <= 0.0f)
+		return 0.0f;
+	float alphaSq = roughness*roughness;
 	float cosThetaSq = (h * n) * (h * n);
 	float tanThetaSq = max(1.0f - cosThetaSq, 0.0f) / cosThetaSq;
 	float cosThetaQu = cosThetaSq*cosThetaSq;
-	return alphaSq*(1.0/PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));*/
+	return alphaSq*(1.0 / PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));
 }
 
 Vector3D GGX::d_sample(float roughness, const Vector3D &n)
@@ -273,7 +276,7 @@ Vector3D GGX::d_sample(float roughness, const Vector3D &n)
 	Vector3D u = v ^ w;
 
 	float rand0_1 = rand_float();
-	float theta = std::atan((roughness * std::sqrt(rand0_1)) / std::sqrt(1 - rand0_1));
+	float theta = std::atan(roughness * std::sqrt(rand0_1/(1.0 - rand0_1)));
 	float phi = rand_float(0, 2 * PI);
 
 	Vector3D m = Vector3D(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta));
@@ -296,7 +299,7 @@ float SmithGTerm::G1(Vector3D v, Vector3D m, Vector3D n)
 		return 0;
 	}
 
-	float tan_o_2 = 1 / (v * m * v * m) - 1;
+	float tan_o_2 = 1 / ((v * n) * (v * n)) - 1;
 	float rough_2 = roughness * roughness;
 
 	float val = visible * 2 / (1 + std::sqrt(1 + rough_2 * tan_o_2));
