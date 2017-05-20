@@ -178,7 +178,7 @@ SV_Matte::path_shade(ShadeRec& sr) {
 
 	//shadow ray
 	RGBColor light_l = 0.0f;
-	int light_sampler_num = 16;
+	int light_sampler_num = 4;
 
 	for (int sample_num = 0; sample_num < light_sampler_num; ++sample_num)
 	{
@@ -200,7 +200,8 @@ SV_Matte::path_shade(ShadeRec& sr) {
 
 				if (is_in_shadow == false)
 				{
-					light_l += l->L(sr) * l->G(sr) * l_ndotwi / l->pdf(sr);
+					RGBColor lv = diffuse_brdf->f(sr, wo, light_wi) * l->L(sr) * l->G(sr) * l_ndotwi / l->pdf(sr);
+					light_l += lv;
 				}
 			}
 		}
@@ -212,7 +213,7 @@ SV_Matte::path_shade(ShadeRec& sr) {
 		pdf = 0.0000000001;
 	}
 
-	return (f * (sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) + light_l) * ndotwi / pdf);
+	return (f * (sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1)) * ndotwi / pdf + light_l);
 }
 
 RGBColor							

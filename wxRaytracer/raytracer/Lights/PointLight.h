@@ -16,6 +16,7 @@ public:
 	virtual Vector3D get_direction(ShadeRec& sr);
 
 	virtual RGBColor L(ShadeRec& sr);
+	float G(const ShadeRec& sr) const;
 
 	void set_position(const Point3D &pos);
 	const Point3D &get_position() const;

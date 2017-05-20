@@ -740,7 +740,7 @@ World::build(void) {
 	break;
 	case 6: //Test microfacet mat
 	{
-		vp.set_hres(400);
+		vp.set_hres(500);
 		vp.set_vres(400);
 		vp.set_samples(num_samples);
 		vp.set_max_depth(5);
@@ -750,16 +750,16 @@ World::build(void) {
 		background_color = black;
 
 		Pinhole* pinhole_ptr = new Pinhole;
-		pinhole_ptr->set_eye(1, 4, 5);
-		pinhole_ptr->set_lookat(0, -0.35, 0);
+		pinhole_ptr->set_eye(2, 3, 3);
+		pinhole_ptr->set_lookat(0, 0, -0.35);
 		pinhole_ptr->set_view_distance(900);
 		pinhole_ptr->compute_uvw();
 		set_camera(pinhole_ptr);
 
 		PointLight* light_ptr1 = new PointLight;
-		light_ptr1->set_position(Point3D(20, 15, 15));
-		light_ptr1->set_radiance(30.0);
-		light_ptr1->set_cast_shadows(false);
+		light_ptr1->set_position(Point3D(0, 3, 3));
+		light_ptr1->set_radiance(30);
+		light_ptr1->set_cast_shadows(true);
 		add_light(light_ptr1);
 
 		/*Directional* dir_ptr = new Directional;
@@ -771,7 +771,7 @@ World::build(void) {
 		SV_GlossyFacet *p_sphere_glossy_facet = new SV_GlossyFacet();
 		//p_sphere_glossy_facet->set_cd(RGBColor(0.4, 0.7, 0.4));
 		p_sphere_glossy_facet->set_cd(white);
-		p_sphere_glossy_facet->set_roughness(0.06);
+		p_sphere_glossy_facet->set_roughness(0.2);
 		p_sphere_glossy_facet->set_ior(1.5);
 		p_sphere_glossy_facet->set_sampler(new MultiJittered(num_samples));
 		Sphere *sphere_ptr = new Sphere(Point3D(0, 0.5, 0), 0.5);
@@ -785,7 +785,7 @@ World::build(void) {
 
 		SV_Matte* matte_ptr2 = new SV_Matte;
 		matte_ptr2->set_ka(0.0);
-		matte_ptr2->set_kd(0.05);
+		matte_ptr2->set_kd(1.0);
 		matte_ptr2->set_cd(checker_ptr);
 		matte_ptr2->set_sampler(new MultiJittered(num_samples));
 

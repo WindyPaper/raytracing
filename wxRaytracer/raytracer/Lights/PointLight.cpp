@@ -31,6 +31,13 @@ RGBColor PointLight::L(ShadeRec& sr)
 	return ls * light_color;
 }
 
+float PointLight::G(const ShadeRec& sr) const
+{
+	Vector3D dis_vec = pos - sr.hit_point;
+	float dist = dis_vec.length();
+	return 1.0 / dist;
+}
+
 void PointLight::set_position(const Point3D &pos)
 {
 	this->pos = pos;

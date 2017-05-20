@@ -27,7 +27,8 @@ Microfacet::Microfacet(DistributionType type) :
 {
 	fresnel = new SchlickApproximationFresnel();
 	g_term = new SmithGTerm(roughness);
-	distribution = new BeckmanDistribution();
+	distribution = new ::GGX();
+	//distribution = new BeckmanDistribution();
 }
 
 Microfacet::~Microfacet()
