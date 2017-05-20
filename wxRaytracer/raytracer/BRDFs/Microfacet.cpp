@@ -154,8 +154,8 @@ double SchlickApproximationFresnel::val(Vector3D i, Vector3D o, Vector3D h, floa
 	double fresnel = f0 + (1.0f - f0) * std::powf((1.0 - (h * i)), 5);
 	return clamp(fresnel, 0.0, 1.0);*/
 
-	float cosi = i * h;
-	float eta = in_ior / out_ior;
+	float cosi = o * h;
+	float eta = out_ior / in_ior;
 
 	if (cosi < 0.0f)
 	{
@@ -163,14 +163,23 @@ double SchlickApproximationFresnel::val(Vector3D i, Vector3D o, Vector3D h, floa
 		cosi = -cosi;
 	}
 
-	float Rn = (1.0f - eta) / (1.0f + eta);
+	/*float Rn = (1.0f - eta) / (1.0f + eta);
 	float R0 = Rn * Rn;
 	float F1 = 1.0f - cosi;
 	float F2 = F1 * F1;
 	float F5 = F2 * F2 * F1;
 
-	return clamp(R0 + (1.0f - R0) * F5, 0.0f, 1.0f);
+	return clamp(R0 + (1.0f - R0) * F5, 0.0f, 1.0f);*/
+	float g = eta * eta - 1.0f + cosi * cosi;
+	if (g > 0.0f)
+	{
+		g = sqrtf(g);
+		float A = (g - cosi) / (g + cosi);
+		float B = (cosi * (g + cosi) - 1.0f) / (cosi * (g - cosi) + 1.0f);
+		return 0.5f * A * A * (1.0f + B * B);
+	}
 
+	return 1.0f;
 }
 
 double BlinnGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
@@ -259,13 +268,21 @@ double GGX::val(float roughness, Vector3D n, Vector3D h)
 	}
 	return m / (PI*d*d);*/
 
-	if (h * n <= 0.0f)
+	//m^2/(\pi (\cos \left(x\right)^2(m^2-1)+1)^2)
+
+	/*if (h * n <= 0.0f)
 		return 0.0f;
 	float alphaSq = roughness*roughness;
 	float cosThetaSq = (h * n) * (h * n);
 	float tanThetaSq = max(1.0f - cosThetaSq, 0.0f) / cosThetaSq;
 	float cosThetaQu = cosThetaSq*cosThetaSq;
-	return alphaSq*(1.0 / PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));
+	return alphaSq*(1.0 / PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));*/
+
+	if (h * n <= 0.0f)
+		return 0.0f;
+	float alphaSq = roughness*roughness;
+	float cosThetaSq = (h * n) * (h * n);
+	return alphaSq / (PI * std::pow((cosThetaSq * (alphaSq - 1) + 1), 2));
 }
 
 Vector3D GGX::d_sample(float roughness, const Vector3D &n)
