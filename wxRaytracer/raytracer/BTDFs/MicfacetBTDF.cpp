@@ -7,9 +7,10 @@ MicrofacetBTDF::MicrofacetBTDF() :
 	ior_o(1.5f),
 	roughness(0.5)
 {
-	fresnel = new SchlickApproximationFresnel();
+	//fresnel = new SchlickApproximationFresnel();
+	fresnel = new DielectricFresnel();
 	g_term = new SmithGTerm(roughness);
-	ndf = new GGX();
+	ndf = new BeckmanDistribution();
 }
 
 MicrofacetBTDF::~MicrofacetBTDF()
@@ -41,21 +42,21 @@ RGBColor MicrofacetBTDF::f(const ShadeRec& sr, const Vector3D& wo, const Vector3
 	float wo_dot_n = wo * sr.normal;
 
 	float eta = ior_i / ior_o;
-	float eta_i = ior_i;
-	float eta_o = ior_o;
+	//float eta_i = ior_i;
+	//float eta_o = ior_o;
 	//Vector3D N = sr.normal;
 	if (wi_dot_n < 0) //inside
 	{
 		eta = ior_o / ior_i;
-		eta_i = ior_o;
-		eta_o = ior_i;
+		//eta_i = ior_o;
+		//eta_o = ior_i;
 	}
 
 	if (wi_dot_n * wo_dot_n > 0.0) // internal reflection
 	{
 		Vector3D hr = signum(wi * sr.normal) * (wi + wo);
 
-		float fl = fresnel->val(wi, wo, hr, eta_i, eta_o);
+		float fl = fresnel->val(wi, wo, hr, ior_i, ior_o);
 		float g = g_term->val(wi, wo, sr.normal, hr);
 		double d = ndf->val(roughness, sr.normal, hr);
 
@@ -65,7 +66,7 @@ RGBColor MicrofacetBTDF::f(const ShadeRec& sr, const Vector3D& wo, const Vector3
 			//printf("MicracetBRDF f NAN !\n");
 			fr = std::numeric_limits<float>::max();
 		}
-		return clamp(fr, 0, 1);
+		return fr;
 	}
 
 	Vector3D h = -(wo + wi * eta);
@@ -75,7 +76,7 @@ RGBColor MicrofacetBTDF::f(const ShadeRec& sr, const Vector3D& wo, const Vector3
 
 	float wi_dot_m = wi * h;
 	float wo_dot_m = wo * h;	
-	float f = fresnel->val(wi, wo, h, eta_i, eta_o);
+	float f = fresnel->val(wi, wo, h, ior_i, ior_o);
 	float g = g_term->val(wi, wo, sr.normal, h);
 	double d = ndf->val(roughness, sr.normal, h);	
 
@@ -112,7 +113,7 @@ RGBColor MicrofacetBTDF::sample_f(const ShadeRec& sr, const Vector3D& wi, Vector
 		//Vector3D hr = signum(wi * sr.normal) * (wi + wt);
 		float dwh_dwo = 1 / (4 * std::abs(wt * m));
 		pdf = ndf->val(roughness, sr.normal, m) * std::abs(m * sr.normal) * dwh_dwo;
-
+		
 		return f(sr, wi, wt);
 	}
 
@@ -179,7 +180,7 @@ void MicrofacetBTDF::set_ior_out(float val)
 
 void MicrofacetBTDF::set_roughness(float val)
 {
-	roughness = std::max(val, LOW_EPS);
+	roughness = std::max(val, ROUGHNESS_EPS);
 
 	g_term->set_roughness(roughness);
 }

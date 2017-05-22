@@ -25,7 +25,7 @@ Microfacet::Microfacet(DistributionType type) :
 	ior(1.5f),
 	roughness(0.0f)
 {
-	fresnel = new SchlickApproximationFresnel();
+	fresnel = new DielectricFresnel();
 	g_term = new SmithGTerm(roughness);
 	distribution = new ::GGX();
 	//distribution = new BeckmanDistribution();
@@ -40,7 +40,7 @@ Microfacet::~Microfacet()
 
 void Microfacet::init_default_param()
 {
-	fresnel = new SchlickApproximationFresnel();
+	fresnel = new DielectricFresnel();
 	g_term = new SmithGTerm(roughness);
 	distribution = new ::GGX();
 }
@@ -62,7 +62,7 @@ void Microfacet::set_cd(const RGBColor &color)
 
 void Microfacet::set_roughness(const float val)
 {
-	roughness = std::max(val, LOW_EPS);
+	roughness = std::max(val, ROUGHNESS_EPS);
 
 	SchlickGTerm *s_gterm = dynamic_cast<SchlickGTerm*>(g_term);
 	if (s_gterm)
@@ -86,6 +86,10 @@ RGBColor Microfacet::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& w
 	double fresnel_val = fresnel->val(wi, wo, h, 1.0, ior);
 	double g = g_term->val(wi, wo, sr.normal, h);
 	double d = distribution->val(roughness, sr.normal, h);
+	if (!is_scalar_valid(d))
+	{
+		d = 100000;//std::numeric_limits<double>::max()/2;
+	}
 
 	double f = fresnel_val * g * d / (4 * std::max(0.0, (sr.normal * wi)) * std::max(0.0, (sr.normal * wo)));
 	
@@ -136,25 +140,6 @@ Microfacet& Microfacet::operator=(const Microfacet& rhs)
 
 double SchlickApproximationFresnel::val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior)
 {
-	/*float cosi = i * h;
-	float coso = o * h;
-	float cos_i = (cosi > 0.0f) ? cosi : (-cosi);
-	float cos_o = (coso > 0.0f) ? coso : (-coso);
-	float t0 = out_ior * cos_i;
-	float t1 = in_ior * cos_o;
-	float t2 = in_ior * cos_i;
-	float t3 = out_ior * cos_o;
-
-	float Rparl = (t0 - t1) / (t0 + t1);
-	float Rparp = (t2 - t3) / (t2 + t3);
-
-	return (Rparl * Rparl + Rparp * Rparp) * 0.5f;*/
-
-	/*double f0 = abs((in_ior - out_ior) / (in_ior + out_ior));
-	f0 = f0 * f0;
-	double fresnel = f0 + (1.0f - f0) * std::powf((1.0 - (h * i)), 5);
-	return clamp(fresnel, 0.0, 1.0);*/
-
 	float cosi = o * h;
 	float eta = out_ior / in_ior;
 
@@ -164,23 +149,13 @@ double SchlickApproximationFresnel::val(Vector3D i, Vector3D o, Vector3D h, floa
 		cosi = -cosi;
 	}
 
-	/*float Rn = (1.0f - eta) / (1.0f + eta);
+	float Rn = (1.0f - eta) / (1.0f + eta);
 	float R0 = Rn * Rn;
 	float F1 = 1.0f - cosi;
 	float F2 = F1 * F1;
 	float F5 = F2 * F2 * F1;
 
-	return clamp(R0 + (1.0f - R0) * F5, 0.0f, 1.0f);*/
-	float g = eta * eta - 1.0f + cosi * cosi;
-	if (g > 0.0f)
-	{
-		g = sqrtf(g);
-		float A = (g - cosi) / (g + cosi);
-		float B = (cosi * (g + cosi) - 1.0f) / (cosi * (g - cosi) + 1.0f);
-		return 0.5f * A * A * (1.0f + B * B);
-	}
-
-	return 1.0f;
+	return clamp(R0 + (1.0f - R0) * F5, 0.0f, 1.0f);
 }
 
 double BlinnGTerm::val(Vector3D i, Vector3D o, Vector3D n, Vector3D h)
@@ -244,41 +219,6 @@ Vector3D BeckmanDistribution::d_sample(float roughness, const Vector3D &n)
 
 double GGX::val(float roughness, Vector3D n, Vector3D h)
 {
-	/*int m_dot_n = n * h > 0.0f ? 1 : 0;
-	if (m_dot_n == 0)
-	{
-		return 0;
-	}
-
-	float cos_m_4 = std::powf(n * h, 4);
-	float tan_m_2 = 1 / ((n * h) * (n * h)) - 1;
-	float rough_2 = roughness * roughness;
-	float d = rough_2 * m_dot_n / (PI * cos_m_4 * std::powf(rough_2 + tan_m_2, 2));
-	return d;*/
-
-	/*float m = roughness * roughness;
-	float m_dot_n = n * h;
-	if (m_dot_n < LOW_EPS)
-	{
-		return 0;
-	}
-	float d = (m - 1.0f) * m_dot_n * m_dot_n + 1.0f;
-	if (d < LOW_EPS)
-	{
-		return 0;
-	}
-	return m / (PI*d*d);*/
-
-	//m^2/(\pi (\cos \left(x\right)^2(m^2-1)+1)^2)
-
-	/*if (h * n <= 0.0f)
-		return 0.0f;
-	float alphaSq = roughness*roughness;
-	float cosThetaSq = (h * n) * (h * n);
-	float tanThetaSq = max(1.0f - cosThetaSq, 0.0f) / cosThetaSq;
-	float cosThetaQu = cosThetaSq*cosThetaSq;
-	return alphaSq*(1.0 / PI) / (cosThetaQu*sqr(alphaSq + tanThetaSq));*/
-
 	if (h * n <= 0.0f)
 		return 0.0f;
 	float alphaSq = roughness*roughness;
@@ -322,4 +262,27 @@ float SmithGTerm::G1(Vector3D v, Vector3D m, Vector3D n)
 
 	float val = visible * 2 / (1 + std::sqrt(1 + rough_2 * tan_o_2));
 	return val;
+}
+
+double DielectricFresnel::val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior)
+{
+	float cosi = o * h;
+	float eta = out_ior / in_ior;
+
+	if (cosi < 0.0f)
+	{
+		eta = 1 / (eta);
+		cosi = -cosi;
+	}
+
+	float g = eta * eta - 1.0f + cosi * cosi;
+	if (g > 0.0f)
+	{
+		g = sqrtf(g);
+		float A = (g - cosi) / (g + cosi);
+		float B = (cosi * (g + cosi) - 1.0f) / (cosi * (g - cosi) + 1.0f);
+		return 0.5f * A * A * (1.0f + B * B);
+	}
+
+	return 1.0f;
 }

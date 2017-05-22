@@ -2,12 +2,19 @@
 
 #include "BRDF.h"
 
+#define ROUGHNESS_EPS (1.0e-3f)
+
 struct IMFresnel
 {
 	virtual double val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior) = 0;
 };
 
 struct SchlickApproximationFresnel : public IMFresnel
+{
+	virtual double val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior);
+};
+
+struct DielectricFresnel : public IMFresnel
 {
 	virtual double val(Vector3D i, Vector3D o, Vector3D h, float in_ior, float out_ior);
 };

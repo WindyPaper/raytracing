@@ -81,20 +81,20 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 	RGBColor L = 0;
 	Vector3D wi;
 	Vector3D wo = -sr.ray.d;
-	float pdf =  0.0;
+	/*float pdf =  0.0;
 	RGBColor f = _p_glossy_brdf->sample_f(sr, wo, wi, pdf);
 	float ndotwi = std::max(0.0, sr.normal * wi);
-	Ray reflected_ray(sr.hit_point, wi);
+	Ray reflected_ray(sr.hit_point, wi);*/
 
 	//transmitter
-	/*Vector3D wt = sr.ray.d;
+	Vector3D wt = sr.ray.d;
 	float t_pdf = 1.0;
 	RGBColor tf = _p_glossy_btdf->sample_f(sr, wo, wt, t_pdf);
-	Ray transimit_ray(sr.hit_point, wt);*/
+	Ray transimit_ray(sr.hit_point, wt);
 
 	//shadow ray
 	RGBColor light_l = 0.0f;
-	int light_sampler_num = 1;
+	int light_sampler_num = 0;
 
 	for (int sample_num = 0; sample_num < light_sampler_num; ++sample_num)
 	{
@@ -123,21 +123,21 @@ RGBColor SV_GlossyFacet::path_shade(ShadeRec& sr)
 	}
 	light_l /= light_sampler_num;
 
-	if (scalar_is_equal(pdf, 0.0))
-	{
-		//pdf = 0.00001;
-		return 0;
-	}
-
-	//if (scalar_is_equal(t_pdf, 0.0))
+	//if (scalar_is_equal(pdf, 0.0))
 	//{
-	//	//t_pdf = 0.00001;
+	//	//pdf = 0.00001;
 	//	return 0;
 	//}
 
-	L += (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf);
-	//L += (tf * sr.w.tracer_ptr->trace_ray(transimit_ray, sr.depth + 1)/ t_pdf);
-	L += light_l;
+	if (scalar_is_equal(t_pdf, 0.0))
+	{
+		//t_pdf = 0.00001;
+		return 0;
+	}
+
+	//L += (f * sr.w.tracer_ptr->trace_ray(reflected_ray, sr.depth + 1) * ndotwi / pdf);
+	L += (tf * sr.w.tracer_ptr->trace_ray(transimit_ray, sr.depth + 1)/ t_pdf);
+	//L += light_l;
 	return L;
 }
 
