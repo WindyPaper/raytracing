@@ -140,6 +140,7 @@
     <ClCompile Include="raytracer\BRDFs\BRDF.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\BxDF.cpp" />
     <ClCompile Include="raytracer\BRDFs\FresnelReflector.cpp" />
     <ClCompile Include="raytracer\BRDFs\FresnelTransmitter.cpp" />
     <ClCompile Include="raytracer\BRDFs\GlossySpecular.cpp" />
@@ -291,6 +292,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h" />
+    <ClInclude Include="raytracer\BRDFs\BxDF.h" />
     <ClInclude Include="raytracer\BRDFs\FresnelReflector.h" />
     <ClInclude Include="raytracer\BRDFs\FresnelTransmitter.h" />
     <ClInclude Include="raytracer\BRDFs\GlossySpecular.h" />

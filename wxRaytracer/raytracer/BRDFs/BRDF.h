@@ -5,13 +5,10 @@
 
 #include <math.h>
 
-#include "RGBColor.h"
-#include "Vector3D.h"
-#include "ShadeRec.h"
-#include "Sampler.h"
-#include "Constants.h"
+#include "BxDF.h"
 
-class BRDF {
+class BRDF : public BxDF
+{
 	public:
 	
 		BRDF(void);						

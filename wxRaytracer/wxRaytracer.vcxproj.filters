@@ -345,6 +345,9 @@
     <ClCompile Include="raytracer\BTDFs\MicfacetBTDF.cpp">
       <Filter>BTDFs</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\BRDFs\BxDF.cpp">
+      <Filter>BRDFs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -652,6 +655,9 @@
     </ClInclude>
     <ClInclude Include="raytracer\Utilities\Util.h">
       <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BRDFs\BxDF.h">
+      <Filter>BRDFs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
