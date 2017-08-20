@@ -21,14 +21,40 @@ BBox::BBox (	const double _x0, const double _x1,
 				const double _y0, const double _y1, 
 				const double _z0, const double _z1)
 	: x0(_x0), x1(_x1), y0(_y0), y1(_y1), z0(_z0), z1(_z1)
-{}
+{
+	if (x0 > x1)
+	{
+		std::swap(x0, x1);
+	}
+	if (y0 > y1)
+	{
+		std::swap(y0, y1);
+	}
+	if (z0 > z1)
+	{
+		std::swap(z0, z1);
+	}
+}
 
 
 // --------------------------------------------------------------------- constructor
 
 BBox::BBox (const Point3D p0, const Point3D p1)
 	: x0(p0.x), x1(p1.x), y0(p0.y), y1(p1.y), z0(p0.z), z1(p1.z)
-{}
+{
+	if (x0 > x1)
+	{
+		std::swap(x0, x1);
+	}
+	if (y0 > y1)
+	{
+		std::swap(y0, y1);
+	}
+	if (z0 > z1)
+	{
+		std::swap(z0, z1);
+	}
+}
 										
 
 
@@ -36,7 +62,20 @@ BBox::BBox (const Point3D p0, const Point3D p1)
 
 BBox::BBox (const BBox& bbox)
 	: x0(bbox.x0), x1(bbox.x1), y0(bbox.y0), y1(bbox.y1), z0(bbox.z0), z1(bbox.z1)
-{}						
+{
+	if (x0 > x1)
+	{
+		std::swap(x0, x1);
+	}
+	if (y0 > y1)
+	{
+		std::swap(y0, y1);
+	}
+	if (z0 > z1)
+	{
+		std::swap(z0, z1);
+	}
+}
 				
 
 // --------------------------------------------------------------------- assignment operator

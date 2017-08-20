@@ -21,7 +21,7 @@ bool Hair::hit(const Ray& ray, double& t, ShadeRec *sr /*= 0*/) const
 {
 	//Point3D p[4] = { Point3D(0, 5, 10), Point3D(0, 5, 5), Point3D(0, 5, 0), Point3D(0, 5, -10) };
 	//Point3D p[4] = { Point3D(0, 5, 20), Point3D(0, 5, 5), Point3D(0, 5, 0), Point3D(0, 5, -10) };
-	Point3D p[4] = { Point3D(0, 5, -10), Point3D(0, 5, 0), Point3D(0, 5, 5), Point3D(0, 5, 10) };
+	Point3D p[4] = { Point3D(0, 5, -10), Point3D(5, 5, -4), Point3D(-5, 5, 3), Point3D(0, 5, 10) };
 
 	BezierCurve test_c(p);
 	
@@ -76,7 +76,7 @@ void Hair::load_hair(const char *filename)
 }
 
 BezierCurve::BezierCurve(const Point3D p[4]) :
-	width(2.0f)
+	width(1.0f)
 {
 	for (int i = 0; i < 4; ++i)
 	{
@@ -108,6 +108,7 @@ void BezierCurve::set_control_point(const Point3D &p0, const Point3D &p1, const 
 bool BezierCurve::hit(const Ray &ray, double& t, ShadeRec *sr)
 {
 	BezierCurve project_c = project(ray);
+	//BezierCurve project_c = *this;
 
 	int max_d = max_depth();
 	return recursive_hit(project_c, ray, t, sr, 0.0f, 1.0f, max_d);
@@ -116,38 +117,27 @@ bool BezierCurve::hit(const Ray &ray, double& t, ShadeRec *sr)
 bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t, ShadeRec *sr, float u0, float u1, int depth)
 {
 	BBox box = c.get_bbox();
+	//printf("min x = %f, max x = %f\n", box.x0, box.x1);
 
-	if (box.z0 > t || box.z1 < kEpsilon
-		|| box.x0 >= width || box.x1 <= -width
+	if (
+		box.x0 >= width || box.x1 <= -width
 		|| box.y0 >= width || box.y1 <= -width)
 	{
 		return false;
 	}
 	else if (depth <= 0)
 	{
-		Vector3D dir = c.p[3] - c.p[0];
-		dir.normalize();
+		// Test sample point against tangent perpendicular at curve start
+		float edge =
+			(c.p[1].y - c.p[0].y) * -c.p[0].y + c.p[0].x * (c.p[0].x - c.p[1].x);
+		if (edge < 0) return false;
 
-		Vector3D dp0 = c.dp(0.0f);
-		if (dir * dp0 < 0.0f)
-		{
-			dp0 *= -1;
-		}
-		if (dp0 * (-c.p[0]) < 0)
-		{
-			return false;
-		}
-		Vector3D dpn = c.dp(1.0f);
-		if (dir * dpn < 0.0f)
-		{
-			dpn *= -1;
-		}
-		if (dpn * c.p[3] < 0)
-		{
-			return false;
-		}
+		// Test sample point against tangent perpendicular at curve end
+		edge = (c.p[2].y - c.p[3].y) * -c.p[3].y + c.p[3].x * (c.p[3].x - c.p[2].x);
+		if (edge < 0) return false;
 
 		//compute w on the line segment
+		Vector3D dir = c.p[3] - c.p[0];
 		float w = dir.x * dir.x + dir.y * dir.y;
 		if (w < kEpsilon)
 		{
@@ -155,26 +145,51 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		}
 
 		w = -(c.p[0].x * dir.x + c.p[0].y * dir.y) / w;
+		//printf("w = %f\n", w);
 		w = clamp(w, 0.0f, 1.0f);
 
 		Point3D cv = c.eval(w);
-		if ((cv.x * cv.x + cv.y * cv.y) > (width *width) ||
+		float cv_dist2 = cv.x * cv.x + cv.y * cv.y;
+		if (cv_dist2 > (width *width) ||
 			cv.z < kEpsilon)
 		{
 			return false;
 		}
 
-		float v = lerp(u0, u1, w); // global value
-		Point3D gcv = this->eval(v);
+		float gu = lerp(u0, u1, w); // global value
+		Point3D gcv = this->eval(gu);
 
 		if (t < gcv.z)
 		{
 			return false;
 		}
 
+		Vector3D dpcdw = c.dp(gu);
+
+		// Compute $v$ coordinate of curve intersection point
+		float cv_dist = std::sqrt(cv_dist2);
+		float edgeFunc = dpcdw.x * -cv.y + cv.x * dpcdw.y;
+		float v = (edgeFunc > 0) ? 0.5f + cv_dist / width
+			: 0.5f - cv_dist / width;
+
+		Vector3D dpdu, dpdv;
+		dpdu = this->dp(gu);
+
+		Vector3D dpdu_plane = get_project_matrix(ray) * dpdu;
+		Vector3D dpdv_plane = Vector3D(-dpdu_plane.y, dpdu_plane.x, 0);
+		dpdv_plane.normalize();
+		dpdv_plane *= width;
+
+		float theta = lerp(-90, 90, v);
+		Matrix rotate_mat = rotate_to_matrix(theta, dpdu_plane);
+		dpdv_plane = rotate_mat * dpdv_plane;
+
+		//dpdv plane to global
+		dpdv = get_project_matrix(ray).inverse() * dpdv_plane;
+
 		t = gcv.z;
-		sr->normal = Vector3D(0.0f, 0.0f, 1.0f);
-		sr->hit_point = gcv;
+		sr->normal = dpdu ^ dpdv; //Vector3D(0.0f, 0.0f, 1.0f);
+		//sr->hit_point = gcv;
 		return true;
 	}
 	else //depth > 0
@@ -198,59 +213,34 @@ Point3D BezierCurve::project_point(const Point3D &o, const Vector3D &lx, const V
 	return Point3D(lx * p, ly * p, lz * p);
 }
 
+Point3D BezierCurve::project_point(const Point3D &p, const Ray &ray) const
+{
+	Vector3D lx, ly, lz;
+	get_project_coordinate(ray, lx, ly, lz);
+
+	return project_point(ray.o, lx, ly, lz, p);	
+}
+
 BezierCurve BezierCurve::project(const Ray &ray) const
 {	
-	/*Matrix ray_pos_mat = Matrix();
-	ray_pos_mat.m[0][3] = -ray.o.x;
-	ray_pos_mat.m[1][3] = -ray.o.y;
-	ray_pos_mat.m[2][3] = -ray.o.z;
-
-	Matrix ray_rotate_mat = Matrix();
-	float d = std::sqrt(ray.d.x * ray.d.x + ray.d.z * ray.d.z);
-
-	if (d < kEpsilon)
-	{
-		printf("Error! Bezider curve hit d == 0!!\n");
-	}
-	ray_rotate_mat.m[0][0] = ray.d.z / d;
-	ray_rotate_mat.m[1][1] = d;
-	ray_rotate_mat.m[2][2] = ray.d.z;
-
-	ray_rotate_mat.m[0][2] = -ray.d.x / d;
-
-	ray_rotate_mat.m[1][0] = -ray.d.x * ray.d.y / d;
-	ray_rotate_mat.m[1][2] = -ray.d.y * ray.d.z / d;
-
-	ray_rotate_mat.m[2][0] = ray.d.x;
-	ray_rotate_mat.m[2][1] = ray.d.y;
-
-	Matrix mat = ray_rotate_mat * ray_pos_mat;
+	Matrix mat = get_project_matrix(ray);
 
 	Point3D t_p[4];
 	for (int i = 0; i < 4; ++i)
 	{
 		t_p[i] = mat * p[i];
-	}*/
+	}
 
 
 	//From tungsten
+	/*Vector3D lx, ly, lz;
 	Point3D t_p[4];
-	Vector3D lz(ray.d);
-	float d = std::sqrt(lz.x*lz.x + lz.z*lz.z);
-	Vector3D lx, ly;
-	if (d == 0.0f) {
-		lx = Vector3D(1.0f, 0.0f, 0.0f);
-		ly = Vector3D(0.0f, 0.0f, -lz.y);
-	}
-	else {
-		lx = Vector3D(lz.z / d, 0.0f, -lz.x / d);
-		ly = Vector3D(lx.z*lz.y, d, -lz.y*lx.x);
-	}
+	get_project_coordinate(ray, lx, ly, lz);
 
 	for (int i = 0; i < 4; ++i)
 	{
 		t_p[i] = project_point(ray.o, lx, ly, lz, p[i]);
-	}
+	}*/
 
 	return BezierCurve(t_p);
 }
@@ -284,22 +274,24 @@ Vector3D BezierCurve::dp(float v) const
 	Point3D a[3] = { lerp(p[0], p[1], v), lerp(p[1], p[2], v), lerp(p[2], p[3], v) };
 	Point3D b[2] = { lerp(a[0], a[1], v), lerp(a[1], a[2], v) };
 
-	Vector3D tangent = b[1] - b[0];
-	tangent.normalize();
+	Vector3D tangent = (1/3.0f) * (b[1] - b[0]);
+	//tangent.normalize();
 	return tangent;
 }
 
 BBox BezierCurve::get_bbox() const
 {
-	BBox b1(p[0], p[1]);
-	BBox b2(p[2], p[3]);
+	BBox b1(p[0] - kEpsilon, p[1] + kEpsilon);
+	BBox b2(p[2] - kEpsilon, p[3] + kEpsilon);
 	
 	return union_box(b1, b2);
+	//return BBox(-2, 2, -2, 2, -10, 10);
+	//return BBox();
 }
 
 int BezierCurve::max_depth() const
 {
-	int L0 = std::max(
+	/*int L0 = std::max(
 		std::max(std::abs(p[0].x - p[1].x * 2 + p[2].x), std::abs(p[0].y - p[1].y * 2 + p[2].y)),
 		std::max(std::abs(p[1].x - p[2].x * 2 + p[3].x), std::abs(p[1].y - p[2].y * 2 + p[3].y))
 	);
@@ -309,9 +301,89 @@ int BezierCurve::max_depth() const
 	int n = 4;
 	float r0 = std::log(std::sqrt(2.0) * n * (n - 1) * L0 / (8 * epsilon)) / std::log(4.0);
 
-	r0 = clamp(r0, 3, 15);
-	
-	return (int)r0;
+	r0 = clamp(r0, 5, 15);*/
+
+	float L0 = 0;
+	for (int i = 0; i < 2; ++i)
+		L0 = std::max(
+			L0, std::max(
+				std::max(std::fabsf(p[i].x - 2 * p[i + 1].x + p[i + 2].x),
+					std::fabsf(p[i].y - 2 * p[i + 1].y + p[i + 2].y)),
+				std::fabsf(p[i].z - 2 * p[i + 1].z + p[i + 2].z)));
+
+	auto float_to_bits = [](float f) -> unsigned int
+	{
+		unsigned int ui;
+		memcpy(&ui, &f, sizeof(float));
+		return ui;
+	};
+
+	float eps = (width * 2) * .05f;  // width / 20
+	auto Log2 = [=](float v) -> int {
+		if (v < 1) return 0;
+		unsigned int bits = float_to_bits(v);
+		// https://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+		// (With an additional add so get round-to-nearest rather than
+		// round down.)
+		return (bits >> 23) - 127 + (bits & (1 << 22) ? 1 : 0);
+	};
+	// Compute log base 4 by dividing log2 in half.
+	int r0 = Log2(1.41421356237f * 6.f * L0 / (8.f * eps)) / 2;
+	int maxDepth = clamp(r0, 0, 10);
+	return maxDepth;
+	//return (int)r0;
+}
+
+void BezierCurve::get_project_coordinate(const Ray &ray, Vector3D &lx, Vector3D &ly, Vector3D &lz) const
+{
+	lz = ray.d;
+	float d = std::sqrt(lz.x*lz.x + lz.z*lz.z);
+	if (d == 0.0f) {
+		lx = Vector3D(1.0f, 0.0f, 0.0f);
+		ly = Vector3D(0.0f, 0.0f, -lz.y);
+	}
+	else {
+		lx = Vector3D(lz.z / d, 0.0f, -lz.x / d);
+		ly = Vector3D(lx.z*lz.y, d, -lz.y*lx.x);
+	}
+}
+
+Matrix BezierCurve::get_project_matrix(const Ray &ray) const
+{
+	Matrix ray_pos_mat = Matrix();
+	ray_pos_mat.m[0][3] = -ray.o.x;
+	ray_pos_mat.m[1][3] = -ray.o.y;
+	ray_pos_mat.m[2][3] = -ray.o.z;
+
+	Matrix ray_rotate_mat = Matrix();
+	float d = std::sqrt(ray.d.x * ray.d.x + ray.d.z * ray.d.z);
+
+	bool is_needed_rotate_x_90 = false;
+	if (d < kEpsilon)
+	{
+		printf("Error! Bezider curve hit d == 0!!\n");
+		is_needed_rotate_x_90 = true;
+	}
+	ray_rotate_mat.m[0][0] = ray.d.z / d;
+	ray_rotate_mat.m[1][1] = d;
+	ray_rotate_mat.m[2][2] = ray.d.z;
+
+	ray_rotate_mat.m[0][2] = -ray.d.x / d;
+
+	ray_rotate_mat.m[1][0] = -ray.d.x * ray.d.y / d;
+	ray_rotate_mat.m[1][2] = -ray.d.y * ray.d.z / d;
+
+	ray_rotate_mat.m[2][0] = ray.d.x;
+	ray_rotate_mat.m[2][1] = ray.d.y;
+
+	if (is_needed_rotate_x_90)
+	{
+		ray_rotate_mat = rotate_to_matrix(90, Vector3D(1.0f, 0.0f, 0.0f)) * ray_rotate_mat;
+	}
+
+	Matrix mat = ray_rotate_mat * ray_pos_mat;
+
+	return mat;
 }
 
 Point3D BezierCurve::blossom_bezier(float u0, float u1, float u2) const

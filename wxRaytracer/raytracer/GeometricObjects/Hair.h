@@ -19,6 +19,7 @@ public:
 	bool recursive_hit(const BezierCurve &c, const Ray &ray, double &t, ShadeRec *sr, float u0, float u1, int depth);
 
 	Point3D project_point(const Point3D &o, const Vector3D &lx, const Vector3D &ly, const Vector3D &lz, const Point3D &q) const;
+	Point3D project_point(const Point3D &p, const Ray &ray) const;
 	BezierCurve project(const Ray &ray) const;
 	void split_bezier(BezierCurve &c0, BezierCurve &c1) const;
 	Point3D eval(float v) const;
@@ -27,6 +28,8 @@ public:
 	int max_depth() const;
 
 protected:
+	void get_project_coordinate(const Ray &ray, Vector3D &lx, Vector3D &ly, Vector3D &lz) const;
+	Matrix get_project_matrix(const Ray &ray) const;
 	Point3D blossom_bezier(float u0, float u1, float u2) const;
 
 private:

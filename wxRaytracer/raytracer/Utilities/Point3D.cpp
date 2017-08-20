@@ -57,6 +57,16 @@ Point3D Point3D::operator/(const float a) const
 	return Point3D(x / a, y / a, z / a);
 }
 
+Point3D Point3D::operator+(const float a) const
+{
+	return Point3D(x + a, y + a, z + a);
+}
+
+Point3D Point3D::operator-(const float a) const
+{
+	return Point3D(x - a, y - a, z - a);
+}
+
 // --------------------------------------------- distance
 // distance between two points
 

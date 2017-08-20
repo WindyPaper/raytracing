@@ -39,6 +39,9 @@ class Point3D {
 			operator* (const float a) const;
 
 		Point3D operator / (const float a) const;
+
+		Point3D operator +(const float a) const;
+		Point3D operator -(const float a) const;
 		
 		double														// square of distance bertween two points
 		d_squared(const Point3D& p) const;

@@ -160,7 +160,7 @@ RGBColor Matte::path_shade(ShadeRec& sr)
 
 	//shadow ray
 	RGBColor light_l = 0.0f;
-	int light_sampler_num = 16;
+	int light_sampler_num = 1;
 
 	for (int sample_num = 0; sample_num < light_sampler_num; ++sample_num)
 	{

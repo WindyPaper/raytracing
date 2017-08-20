@@ -1,7 +1,9 @@
 // This file contains the definition of the class Vector3D
 
 #include <math.h>
+#include <algorithm>
 
+#include "Maths.h"
 #include "Vector3D.h"
 #include "Normal.h"
 #include "Point3D.h"
@@ -131,9 +133,35 @@ Vector3D::hat(void) {
 // ----------------------------------------------------------  operator* 
 // multiplication by a matrix on the left
 
-Vector3D 
+Vector3D
 operator* (const Matrix& mat, const Vector3D& v) {
 	return (Point3D(mat.m[0][0] * v.x + mat.m[0][1] * v.y + mat.m[0][2] * v.z,
-					mat.m[1][0] * v.x + mat.m[1][1] * v.y + mat.m[1][2] * v.z,
-					mat.m[2][0] * v.x + mat.m[2][1] * v.y + mat.m[2][2] * v.z));
+		mat.m[1][0] * v.x + mat.m[1][1] * v.y + mat.m[1][2] * v.z,
+		mat.m[2][0] * v.x + mat.m[2][1] * v.y + mat.m[2][2] * v.z));
+}
+
+Matrix rotate_to_matrix(float theta, const Vector3D &axis)
+{
+	Vector3D a = axis;
+	a.normalize();
+	float sinTheta = std::sin(to_radian(theta));
+	float cosTheta = std::cos(to_radian(theta));
+	Matrix mat;
+	// Compute rotation of first basis vector
+	mat.m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;
+	mat.m[0][1] = a.x * a.y * (1 - cosTheta) - a.z * sinTheta;
+	mat.m[0][2] = a.x * a.z * (1 - cosTheta) + a.y * sinTheta;
+	mat.m[0][3] = 0;
+
+	// Compute rotations of second and third basis vectors
+	mat.m[1][0] = a.x * a.y * (1 - cosTheta) + a.z * sinTheta;
+	mat.m[1][1] = a.y * a.y + (1 - a.y * a.y) * cosTheta;
+	mat.m[1][2] = a.y * a.z * (1 - cosTheta) - a.x * sinTheta;
+	mat.m[1][3] = 0;
+
+	mat.m[2][0] = a.x * a.z * (1 - cosTheta) - a.y * sinTheta;
+	mat.m[2][1] = a.y * a.z * (1 - cosTheta) + a.x * sinTheta;
+	mat.m[2][2] = a.z * a.z + (1 - a.z * a.z) * cosTheta;
+	mat.m[2][3] = 0;
+	return mat;
 }

@@ -32,7 +32,11 @@ class Matrix {
 		operator/ (const double d);
 
 		void											// set to the identity matrix
-		set_identity(void);	
+		set_identity(void);
+
+		Matrix inverse() const;
+
+		//Vector3D operator* (const Vector3D &v) const;
 };
 
 
