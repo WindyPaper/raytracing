@@ -5,6 +5,8 @@
 // Matrix is a 4 x 4 square matrix that is used to represent affine transformations
 // we don't need a general m x n matrix
 
+// Multiply for left
+
 //----------------------------------------- class Matrix
 
 class Matrix {

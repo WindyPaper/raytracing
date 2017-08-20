@@ -64,6 +64,8 @@ class Vector3D {
 		
 		Vector3D 												// cross product				
 		operator^ (const Vector3D& v) const;
+
+		Vector3D operator *=(const float a);
 		
 		void 													// convert vector to a unit vector
 		normalize(void); 

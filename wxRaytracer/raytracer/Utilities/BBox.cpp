@@ -6,6 +6,7 @@
 #include "BBox.h"
 #include "Constants.h"
 
+#include <algorithm>
 
 // --------------------------------------------------------------------- default constructor
 
@@ -138,3 +139,15 @@ BBox::inside(const Point3D& p) const {
 
 
 
+BBox union_box(const BBox &b1, const BBox &b2)
+{
+	Point3D min_p(std::min(b1.x0, b2.x0),
+		std::min(b1.y0, b2.y0),
+		std::min(b1.z0, b2.z0));
+
+	Point3D max_p(std::max(b1.x1, b2.x1),
+		std::max(b1.y1, b2.y1),
+		std::max(b1.z1, b2.z1));
+
+	return BBox(min_p, max_p);
+}

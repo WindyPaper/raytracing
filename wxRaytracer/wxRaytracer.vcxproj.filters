@@ -348,6 +348,9 @@
     <ClCompile Include="raytracer\BRDFs\BxDF.cpp">
       <Filter>BRDFs</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\GeometricObjects\Hair.cpp">
+      <Filter>Geometric Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -658,6 +661,12 @@
     </ClInclude>
     <ClInclude Include="raytracer\BRDFs\BxDF.h">
       <Filter>BRDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\GeometricObjects\Hair.h">
+      <Filter>Geometric Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\GeometricObjects\cyHairFile.h">
+      <Filter>Geometric Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

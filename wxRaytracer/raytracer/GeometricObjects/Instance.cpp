@@ -250,7 +250,7 @@ Instance::hit(const Ray& ray, double& t, ShadeRec* sr) const {
 	inv_ray.d = inv_matrix * inv_ray.d;
 				
 	if (object_ptr->hit(inv_ray, t, sr)) {
-		sr->normal = inv_matrix * sr->normal;
+		sr->normal = inv_matrix * sr->normal; // The transform of normal is wrong.  TODO: fix this
 		sr->normal.normalize();
 						
 		if (object_ptr->get_material())

@@ -94,3 +94,9 @@ inline Vector3D get_refraction(const float eta_i, const float eta_o, const Vecto
 		return -(neta * i) + (nK * Nn);
 	}
 }
+
+template<typename T>
+T lerp(T v1, T v2, float t)
+{
+	return v1 + (v2 - v1) * t;
+}

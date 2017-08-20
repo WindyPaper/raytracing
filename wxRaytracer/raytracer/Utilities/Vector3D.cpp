@@ -96,6 +96,15 @@ Vector3D::length(void) {
 }
 
 
+Vector3D Vector3D::operator*=(const float a)
+{
+	x *= a;
+	y *= a;
+	z *= a;
+
+	return (*this);
+}
+
 // ----------------------------------------------------------  normalize
 // converts the vector to a unit vector
 

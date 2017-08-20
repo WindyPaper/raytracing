@@ -36,6 +36,8 @@ class BBox {
 		bool
 		inside(const Point3D& p) const;
 };
+
+BBox union_box(const BBox &b1, const BBox &b2);
 	
 #endif
 
