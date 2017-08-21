@@ -76,7 +76,7 @@ void Hair::load_hair(const char *filename)
 }
 
 BezierCurve::BezierCurve(const Point3D p[4]) :
-	width(1.0f)
+	width(3.0f)
 {
 	for (int i = 0; i < 4; ++i)
 	{
@@ -157,14 +157,14 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		}
 
 		float gu = lerp(u0, u1, w); // global value
-		Point3D gcv = this->eval(gu);
+		//Point3D gcv = this->eval(gu);
 
-		if (t < gcv.z)
+		if (t < cv.z)
 		{
 			return false;
 		}
 
-		Vector3D dpcdw = c.dp(gu);
+		Vector3D dpcdw = c.dp(w);
 
 		// Compute $v$ coordinate of curve intersection point
 		float cv_dist = std::sqrt(cv_dist2);
@@ -187,8 +187,20 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		//dpdv plane to global
 		dpdv = get_project_matrix(ray).inverse() * dpdv_plane;
 
-		t = gcv.z;
-		sr->normal = dpdu ^ dpdv; //Vector3D(0.0f, 0.0f, 1.0f);
+		//dpdu.normalize();
+		//dpdv.normalize();
+		//float test_dot = dpdu * dpdv;
+
+		t = cv.z;
+		if (t < 0.0f)
+		{
+			printf("Error!, t < 0 in Hair Intersection!\n");
+		}
+		//sr->normal = dpdu ^ dpdv;
+		sr->normal = dpdv ^ dpdu;
+		sr->normal.normalize();
+		//sr->normal = -sr->normal;
+		//sr->normal = Vector3D(1.0f, -1.0f, 0.0f);
 		//sr->hit_point = gcv;
 		return true;
 	}

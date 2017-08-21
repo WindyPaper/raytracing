@@ -218,7 +218,7 @@ ShadeRec
 World::hit_objects(const Ray& ray) {
 
 	ShadeRec	sr(*this); 
-	double		t;
+	double		t = kHugeValue;
 	Normal normal;
 	Point3D local_hit_point;
 	float		tmin 			= kHugeValue;
