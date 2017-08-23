@@ -9,7 +9,7 @@ Camera::Camera(void)
 	:	eye(0, 0, 500),
 		lookat(0),
 		ra(0),
-		up(0, 1, 0),
+		up(0, 0, 1),
 		u(1, 0, 0),
 		v(0, 1, 0),
 		w(0, 0, 1),
@@ -69,6 +69,14 @@ Camera::compute_uvw(void) {
 	u = up ^ w; 
 	u.normalize();
 	v = w ^ u;
+
+	//v = eye - lookat;
+	//v = lookat - eye;
+	//v.normalize();
+	//u = up ^ v;
+	////u = v ^ up;
+	//u.normalize();
+	//w = u ^ v;
 
 	// take care of the singularity by hardwiring in specific camera orientations
 	

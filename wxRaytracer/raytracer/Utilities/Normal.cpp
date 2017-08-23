@@ -81,6 +81,15 @@ Normal::operator= (const Point3D& rhs) {
 }
 
 
+Normal Normal::operator*=(const int a)
+{
+	x *= a;
+	y *= a;
+	z *= a;
+
+	return (*this);
+}
+
 // ------------------------------------------------------------ normalize
 
 void 													

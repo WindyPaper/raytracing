@@ -187,6 +187,10 @@ operator* (const Matrix& mat, const Vector3D& v);
 
 Matrix rotate_to_matrix(float theta, const Vector3D &axis);
 
+Vector3D normalize(const Vector3D &v);
+
+
+
 
 #endif
 

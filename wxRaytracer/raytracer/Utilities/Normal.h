@@ -47,6 +47,8 @@ class Normal
 		
 		Normal 												// multiplication by a double on the right
 		operator* (const double a) const;
+
+		Normal operator*= (const int a);
 				
 		void 												// convert normal to a unit normal
 		normalize(void); 									 		

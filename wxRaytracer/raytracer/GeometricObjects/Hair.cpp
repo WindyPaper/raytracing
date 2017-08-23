@@ -19,9 +19,9 @@ Hair* Hair::clone(void) const
 
 bool Hair::hit(const Ray& ray, double& t, ShadeRec *sr /*= 0*/) const
 {
-	//Point3D p[4] = { Point3D(0, 5, 10), Point3D(0, 5, 5), Point3D(0, 5, 0), Point3D(0, 5, -10) };
-	//Point3D p[4] = { Point3D(0, 5, 20), Point3D(0, 5, 5), Point3D(0, 5, 0), Point3D(0, 5, -10) };
-	Point3D p[4] = { Point3D(0, 5, -10), Point3D(5, 5, -4), Point3D(-5, 5, 3), Point3D(0, 5, 10) };
+	Point3D p[4] = { Point3D(0, 5, 10), Point3D(5, 5, 5), Point3D(5, 5, 0), Point3D(0, 5, -10) };
+	//Point3D p[4] = { Point3D(0, 5, -10), Point3D(0, 5, -4), Point3D(0, 5, 3), Point3D(0, 5, 10) };
+	//Point3D p[4] = { Point3D(0, 5, -10), Point3D(5, 5, -4), Point3D(-5, 5, 3), Point3D(0, 5, 10) };
 
 	BezierCurve test_c(p);
 	
@@ -107,14 +107,15 @@ void BezierCurve::set_control_point(const Point3D &p0, const Point3D &p1, const 
 
 bool BezierCurve::hit(const Ray &ray, double& t, ShadeRec *sr)
 {
-	BezierCurve project_c = project(ray);
+	Matrix object_to_ray_mat;
+	BezierCurve project_c = project(ray, object_to_ray_mat);
 	//BezierCurve project_c = *this;
 
 	int max_d = max_depth();
-	return recursive_hit(project_c, ray, t, sr, 0.0f, 1.0f, max_d);
+	return recursive_hit(project_c, ray, t, sr, 0.0f, 1.0f, max_d, object_to_ray_mat);
 }
 
-bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t, ShadeRec *sr, float u0, float u1, int depth)
+bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t, ShadeRec *sr, float u0, float u1, int depth, const Matrix& object_to_ray_mat)
 {
 	BBox box = c.get_bbox();
 	//printf("min x = %f, max x = %f\n", box.x0, box.x1);
@@ -175,7 +176,7 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		Vector3D dpdu, dpdv;
 		dpdu = this->dp(gu);
 
-		Vector3D dpdu_plane = get_project_matrix(ray) * dpdu;
+		Vector3D dpdu_plane = object_to_ray_mat * dpdu;
 		Vector3D dpdv_plane = Vector3D(-dpdu_plane.y, dpdu_plane.x, 0);
 		dpdv_plane.normalize();
 		dpdv_plane *= width;
@@ -185,7 +186,7 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		dpdv_plane = rotate_mat * dpdv_plane;
 
 		//dpdv plane to global
-		dpdv = get_project_matrix(ray).inverse() * dpdv_plane;
+		dpdv = object_to_ray_mat.inverse() * dpdv_plane;
 
 		//dpdu.normalize();
 		//dpdv.normalize();
@@ -196,8 +197,9 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		{
 			printf("Error!, t < 0 in Hair Intersection!\n");
 		}
-		//sr->normal = dpdu ^ dpdv;
-		sr->normal = dpdv ^ dpdu;
+		sr->normal = dpdu ^ dpdv;
+		//sr->normal *= -1;
+		//sr->normal = dpdv ^ dpdu;
 		sr->normal.normalize();
 		//sr->normal = -sr->normal;
 		//sr->normal = Vector3D(1.0f, -1.0f, 0.0f);
@@ -214,8 +216,8 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		BezierCurve cl(default_v), cr(default_v);
 		c.split_bezier(cl, cr);
 
-		return recursive_hit(cl, ray, t, sr, u0, um, depth) ||
-			recursive_hit(cr, ray, t, sr, um, u1, depth);
+		return recursive_hit(cl, ray, t, sr, u0, um, depth, object_to_ray_mat) ||
+			recursive_hit(cr, ray, t, sr, um, u1, depth, object_to_ray_mat);
 	}
 }
 
@@ -233,9 +235,12 @@ Point3D BezierCurve::project_point(const Point3D &p, const Ray &ray) const
 	return project_point(ray.o, lx, ly, lz, p);	
 }
 
-BezierCurve BezierCurve::project(const Ray &ray) const
+BezierCurve BezierCurve::project(const Ray &ray, Matrix &in_mat) const
 {	
-	Matrix mat = get_project_matrix(ray);
+	//Matrix mat = get_project_matrix(ray);
+	Vector3D up = ray.d ^ Vector3D(p[3] - p[0]);
+	Matrix mat = get_project_matrix(ray, up);
+	in_mat = mat;
 
 	Point3D t_p[4];
 	for (int i = 0; i < 4; ++i)
@@ -396,6 +401,11 @@ Matrix BezierCurve::get_project_matrix(const Ray &ray) const
 	Matrix mat = ray_rotate_mat * ray_pos_mat;
 
 	return mat;
+}
+
+Matrix BezierCurve::get_project_matrix(const Ray &ray, const Vector3D &up) const
+{
+	return look_at_mat(ray, up);
 }
 
 Point3D BezierCurve::blossom_bezier(float u0, float u1, float u2) const

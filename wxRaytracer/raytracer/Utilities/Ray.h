@@ -28,3 +28,5 @@ class Ray {
 		 								
 		~Ray(void);
 };
+
+Matrix look_at_mat(const Ray &ray, const Vector3D &up);

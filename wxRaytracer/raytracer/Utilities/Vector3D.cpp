@@ -165,3 +165,9 @@ Matrix rotate_to_matrix(float theta, const Vector3D &axis)
 	mat.m[2][3] = 0;
 	return mat;
 }
+
+Vector3D normalize(const Vector3D &v)
+{
+	double length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	return Vector3D(v.x / length, v.y / length, v.z / length);
+}
