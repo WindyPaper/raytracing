@@ -32,6 +32,7 @@ class ShadeRec {
 		Point3D		light_sample_point; // used for shadow ray hits the light point
 		Vector3D		light_wi;  //unit vector from hit point to sample point
 		float u, v;
+		Vector3D dpdu, dpdv;
 				
 		ShadeRec(World& wr);					// constructor
 		

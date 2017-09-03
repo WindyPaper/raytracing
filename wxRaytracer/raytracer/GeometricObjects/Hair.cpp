@@ -19,9 +19,9 @@ Hair* Hair::clone(void) const
 
 bool Hair::hit(const Ray& ray, double& t, ShadeRec *sr /*= 0*/) const
 {
-	Point3D p[4] = { Point3D(0, 5, 10), Point3D(5, 5, 5), Point3D(5, 5, 0), Point3D(0, 5, -10) };
+	//Point3D p[4] = { Point3D(0, 5, 10), Point3D(5, 5, 5), Point3D(5, 5, 0), Point3D(0, 5, -10) };
 	//Point3D p[4] = { Point3D(0, 5, -10), Point3D(0, 5, -4), Point3D(0, 5, 3), Point3D(0, 5, 10) };
-	//Point3D p[4] = { Point3D(0, 5, -10), Point3D(5, 5, -4), Point3D(-5, 5, 3), Point3D(0, 5, 10) };
+	Point3D p[4] = { Point3D(0, 5, -10), Point3D(5, 5, -4), Point3D(-5, 5, 3), Point3D(0, 5, 10) };
 
 	BezierCurve test_c(p);
 	
@@ -198,6 +198,8 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 			printf("Error!, t < 0 in Hair Intersection!\n");
 		}
 		sr->normal = dpdu ^ dpdv;
+		sr->dpdu = normalize(dpdu);
+		sr->dpdv = normalize(dpdv);
 		//sr->normal *= -1;
 		//sr->normal = dpdv ^ dpdu;
 		sr->normal.normalize();

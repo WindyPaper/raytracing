@@ -351,6 +351,12 @@
     <ClCompile Include="raytracer\GeometricObjects\Hair.cpp">
       <Filter>Geometric Objects</Filter>
     </ClCompile>
+    <ClCompile Include="raytracer\BSDF\HairBcsdf.cpp">
+      <Filter>BSDFs</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracer\Materials\HairMaterial.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="raytracer\BRDFs\BRDF.h">
@@ -667,6 +673,12 @@
     </ClInclude>
     <ClInclude Include="raytracer\GeometricObjects\cyHairFile.h">
       <Filter>Geometric Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\BSDF\HairBcsdf.h">
+      <Filter>BSDFs</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracer\Materials\HairMaterial.h">
+      <Filter>Materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

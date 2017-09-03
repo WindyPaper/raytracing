@@ -60,7 +60,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;raytracer\Thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>wxwidgets\msw;wxwidgets\include;raytracer\BRDFs;raytracer\BTDFs;raytracer\build;raytracer\Cameras;raytracer\GeometricObjects;raytracer\Lights;raytracer\Mappings;raytracer\Materials;raytracer\Noises;raytracer\Samplers;raytracer\Textures;raytracer\Tracers;raytracer\UserInterface;raytracer\Utilities;raytracer\World;raytracer\Thread;raytracer\bsdf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;__WIN32__;__WXMSW__;WINVER=0x0400;STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Debug\wxRaytracer.pch</PrecompiledHeaderOutputFile>
@@ -150,6 +150,7 @@
     <ClCompile Include="raytracer\BRDFs\Microfacet.cpp" />
     <ClCompile Include="raytracer\BRDFs\PerfectSpecular.cpp" />
     <ClCompile Include="raytracer\BSDF\BSDF.cpp" />
+    <ClCompile Include="raytracer\BSDF\HairBcsdf.cpp" />
     <ClCompile Include="raytracer\BTDFs\BTDF.cpp" />
     <ClCompile Include="raytracer\BTDFs\MicfacetBTDF.cpp" />
     <ClCompile Include="raytracer\BTDFs\PerfectTransmitter.cpp" />
@@ -208,6 +209,7 @@
     <ClCompile Include="raytracer\Materials\Dielectric.cpp" />
     <ClCompile Include="raytracer\Materials\Emissive.cpp" />
     <ClCompile Include="raytracer\Materials\GlossyReflector.cpp" />
+    <ClCompile Include="raytracer\Materials\HairMaterial.cpp" />
     <ClCompile Include="raytracer\Materials\Material.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /EHsc   /EHsc </AdditionalOptions>
     </ClCompile>
@@ -301,6 +303,7 @@
     <ClInclude Include="raytracer\BRDFs\Microfacet.h" />
     <ClInclude Include="raytracer\BRDFs\PerfectSpecular.h" />
     <ClInclude Include="raytracer\BSDF\BSDF.h" />
+    <ClInclude Include="raytracer\BSDF\HairBcsdf.h" />
     <ClInclude Include="raytracer\BTDFs\BTDF.h" />
     <ClInclude Include="raytracer\BTDFs\MicfacetBTDF.h" />
     <ClInclude Include="raytracer\BTDFs\PerfectTransmitter.h" />
@@ -343,6 +346,7 @@
     <ClInclude Include="raytracer\Materials\Dielectric.h" />
     <ClInclude Include="raytracer\Materials\Emissive.h" />
     <ClInclude Include="raytracer\Materials\GlossyReflector.h" />
+    <ClInclude Include="raytracer\Materials\HairMaterial.h" />
     <ClInclude Include="raytracer\Materials\Material.h" />
     <ClInclude Include="raytracer\Materials\Matte.h" />
     <ClInclude Include="raytracer\Materials\Phong.h" />

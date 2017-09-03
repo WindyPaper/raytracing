@@ -40,7 +40,11 @@ ShadeRec::ShadeRec(const ShadeRec& sr)
 		w(sr.w),
 		color(sr.color),
 		light_sample_point(0.0f),
-		light_wi(0.0f)
+		light_wi(0.0f),
+		u(sr.u),
+		v(sr.v),
+		dpdu(sr.dpdu),
+		dpdv(sr.dpdv)
 {
 }
 
