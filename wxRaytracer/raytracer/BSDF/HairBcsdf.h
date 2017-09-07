@@ -29,22 +29,28 @@ protected:
 
 	float omega(int p, float h);
 	float gaussian_detector(float beta, float phi);
+	float logistic_function(float x, float s);
+	float logistic_cdf(float x, float s);
+	float trimmed_logistic(float x, float s, float a, float b);
 	float hair_F(float cos_theta);
-	float attenuation(int p, float h, float ua);
-	float N(int p, float beta);
+	RGBColor attenuation(int p, float h, RGBColor ua, float v_dot_l, float cos_theta_t, float cos_theta_d);
+	RGBColor N(int p, float beta, float v_dot_l, float cos_theta_t, float cos_theta_d, float cos_phi);
+	RGBColor N_h(int p, float beta, float h, float v_dot_l, float cos_theta_t, float cos_theta_d, float cos_phi);
 
 private:
-	mutable float v_dot_l;
-	mutable float ior;
-	mutable float ior_prime;
+	float s; //logistic function
+
+	float ior;
+	float ior_prime;
 	//float hair_n;
+	/*mutable float v_dot_l;
 	mutable float cos_theta_t;
 	mutable float cos_theta_d;
-	mutable float cos_phi;
+	mutable float cos_phi;*/
 
-	mutable float beta_r;
-	mutable float beta_tt;
-	mutable float beta_trt;
+	float beta_r;
+	float beta_tt;
+	float beta_trt;
 };
 
 

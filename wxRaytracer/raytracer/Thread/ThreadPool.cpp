@@ -29,7 +29,7 @@ ThreadPool::~ThreadPool()
 int ThreadPool::initThreads()
 {
 	int threadCount = getMachineProcessorNum();
-	threadCount = 1;
+	//threadCount = 1;
 	for (int i = 0; i < threadCount; ++i)
 	{
 		ThreadInfo *pThread = new ThreadInfo(this);

@@ -60,4 +60,5 @@ RGBColor HairMaterial::path_shade(ShadeRec& sr)
 	light_l /= light_sampler_num;
 
 	return light_l;
+	//return RGBColor(sr.u);
 }

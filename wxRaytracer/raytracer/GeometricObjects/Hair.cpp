@@ -76,7 +76,7 @@ void Hair::load_hair(const char *filename)
 }
 
 BezierCurve::BezierCurve(const Point3D p[4]) :
-	width(3.0f)
+	width(6.0f)
 {
 	for (int i = 0; i < 4; ++i)
 	{
@@ -111,7 +111,7 @@ bool BezierCurve::hit(const Ray &ray, double& t, ShadeRec *sr)
 	BezierCurve project_c = project(ray, object_to_ray_mat);
 	//BezierCurve project_c = *this;
 
-	int max_d = max_depth();
+	int max_d = max_depth() + 2;
 	return recursive_hit(project_c, ray, t, sr, 0.0f, 1.0f, max_d, object_to_ray_mat);
 }
 
@@ -121,8 +121,8 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 	//printf("min x = %f, max x = %f\n", box.x0, box.x1);
 
 	if (
-		box.x0 >= width || box.x1 <= -width
-		|| box.y0 >= width || box.y1 <= -width)
+		box.x0 >= width / 2.0f || box.x1 <= -width / 2.0f
+		|| box.y0 >= width / 2.0f || box.y1 <= -width / 2.0f)
 	{
 		return false;
 	}
@@ -147,17 +147,17 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 
 		w = -(c.p[0].x * dir.x + c.p[0].y * dir.y) / w;
 		//printf("w = %f\n", w);
-		w = clamp(w, 0.0f, 1.0f);
+		//w = clamp(w, 0.0f, 1.0f);
 
 		Point3D cv = c.eval(w);
 		float cv_dist2 = cv.x * cv.x + cv.y * cv.y;
-		if (cv_dist2 > (width *width) ||
+		if (cv_dist2 > (0.25 * width *width) ||
 			cv.z < kEpsilon)
 		{
 			return false;
 		}
 
-		float gu = lerp(u0, u1, w); // global value
+		float gu = clamp(lerp(u0, u1, w), u0, u1); // global value
 		//Point3D gcv = this->eval(gu);
 
 		if (t < cv.z)
@@ -200,6 +200,8 @@ bool BezierCurve::recursive_hit(const BezierCurve &c, const Ray &ray, double &t,
 		sr->normal = dpdu ^ dpdv;
 		sr->dpdu = normalize(dpdu);
 		sr->dpdv = normalize(dpdv);
+		sr->u = gu;
+		sr->v = v;
 		//sr->normal *= -1;
 		//sr->normal = dpdv ^ dpdu;
 		sr->normal.normalize();

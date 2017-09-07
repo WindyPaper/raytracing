@@ -7,6 +7,8 @@ HairBcsdf::HairBcsdf()
 	beta_r = 0.2f;
 	beta_tt = beta_r * 0.5f;
 	beta_trt = beta_r * 2.0f;
+
+	s = (0.265f * beta_r + 1.194f * (beta_r * beta_r) + 5.372f * std::pow(beta_r, 22));
 }
 
 HairBcsdf* HairBcsdf::clone(void) const
@@ -44,16 +46,18 @@ RGBColor HairBcsdf::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi
 RGBColor HairBcsdf::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi)
 {
 	ior = 1.55f;
-	v_dot_l = wo * wi;
+	float v_dot_l = wo * wi;
 	float sin_theta_i = sr.dpdu * wi;
 	float sin_theta_o = sr.dpdu * wo;
 
-	cos_theta_t = std::sqrt(1 - std::pow((1 / ior) * sin_theta_i, 2));
-	cos_theta_d = std::cos(0.5 * std::abs(std::asin(sin_theta_o) - std::asin(sin_theta_i)));
+	float h = 2 * sr.v - 1.0f;
+
+	float cos_theta_t = std::sqrt(1 - std::pow((1 / ior) * sin_theta_i, 2));
+	float cos_theta_d = std::cos(0.5 * std::abs(std::asin(sin_theta_o) - std::asin(sin_theta_i)));
 
 	Vector3D wi_p = wi - sin_theta_i * sr.dpdu;
 	Vector3D wo_p = wo - sin_theta_o * sr.dpdu;
-	cos_phi = wi_p * wo_p * (1 / std::sqrt((wi_p * wi_p) * (wo_p * wo_p)));
+	float cos_phi = wi_p * wo_p * (1 / std::sqrt((wi_p * wi_p) * (wo_p * wo_p)));
 
 	ior_prime = std::sqrt(ior * ior - 1 + std::pow(cos_theta_d, 2)) / cos_theta_d;
 
@@ -62,7 +66,8 @@ RGBColor HairBcsdf::f(const ShadeRec& sr, const Vector3D& wo, const Vector3D& wi
 	RGBColor s = RGBColor();
 	for (int p = 0; p < 3; ++p)
 	{
-		s += M(v[p], sin_theta_i, sin_theta_o, std::sqrt(1.0f - sin_theta_i * sin_theta_i), std::sqrt(1.0f - sin_theta_o * sin_theta_o)) * N(p, v[p]);
+		//s += M(v[p], sin_theta_i, sin_theta_o, std::sqrt(1.0f - sin_theta_i * sin_theta_i), std::sqrt(1.0f - sin_theta_o * sin_theta_o)) * N(p, v[p]);
+		s += M(v[p], sin_theta_i, sin_theta_o, std::sqrt(1.0f - sin_theta_i * sin_theta_i), std::sqrt(1.0f - sin_theta_o * sin_theta_o)) * N_h(p, v[p], h, v_dot_l, cos_theta_t, cos_theta_d, cos_phi);
 	}
 
 	return s;
@@ -141,6 +146,23 @@ float HairBcsdf::gaussian_detector(float beta, float phi)
 	return dp;
 }
 
+float HairBcsdf::logistic_function(float x, float s)
+{
+	x = std::abs(x);
+	float e_val = std::exp(-x / s);
+	return e_val / (s * (1 + e_val) * (1 + e_val));
+}
+
+float HairBcsdf::logistic_cdf(float x, float s)
+{
+	return 1.0f / (1.0 + std::exp(-x / s));
+}
+
+float HairBcsdf::trimmed_logistic(float x, float s, float a, float b)
+{
+	return logistic_function(x, s) / (logistic_cdf(b, s) - logistic_cdf(a, s));
+}
+
 float HairBcsdf::hair_F(float cos_theta)
 {
 	const float n = 1.55;
@@ -149,9 +171,9 @@ float HairBcsdf::hair_F(float cos_theta)
 	return F0 + (1 - F0) * std::pow(1 - cos_theta, 5);
 }
 
-float HairBcsdf::attenuation(int p, float h, float ua)
+RGBColor HairBcsdf::attenuation(int p, float h, RGBColor ua, float v_dot_l, float cos_theta_t, float cos_theta_d)
 {
-	float A;
+	RGBColor A = 0;
 	if (p == 0) //R
 	{
 		A = hair_F(std::sqrt(0.5 + 0.5 * v_dot_l));
@@ -159,36 +181,57 @@ float HairBcsdf::attenuation(int p, float h, float ua)
 	else
 	{
 		//float ua = 0.2; //absorption
-		float ua_prime = ua / cos_theta_t;
+		RGBColor ua_prime = ua / cos_theta_t;
 		float f = hair_F(cos_theta_d * std::sqrt(1 - h * h));
 
 		//float yi = std::asin(h);
 		float yt = std::asin(h / ior_prime);
 
-		float T = std::exp(-2 * ua * (1 + std::cos(2 * yt)));
+		RGBColor T = 0;
+		T.r = std::exp(-2 * ua_prime.r * (1 + std::cos(2 * yt)));
+		T.g = std::exp(-2 * ua_prime.g * (1 + std::cos(2 * yt)));
+		T.b = std::exp(-2 * ua_prime.b * (1 + std::cos(2 * yt)));
 
-		A = std::pow(1 - f, 2) * std::pow(f, p - 1) * std::pow(T, p);
+		A.r = std::pow(1 - f, 2) * std::pow(f, p - 1) * std::pow(T.r, p);
+		A.g = std::pow(1 - f, 2) * std::pow(f, p - 1) * std::pow(T.g, p);
+		A.b = std::pow(1 - f, 2) * std::pow(f, p - 1) * std::pow(T.b, p);
 	}
 
 	return A;
 }
 
-float HairBcsdf::N(int p, float beta)
+RGBColor HairBcsdf::N(int p, float beta, float v_dot_l, float cos_theta_t, float cos_theta_d, float cos_phi)
 {
-	float ua = 0.2; //absorption
-	float phi = std::asin(cos_phi);
+	RGBColor ua = RGBColor(0.4, 0.6, 0.1); //absorption
+	float phi = std::acos(cos_phi);
 
 	int subdiv_num = 16;
 	float w = 2.0f / subdiv_num;
-	float N = 0;
+	RGBColor N = 0;
 	for (int i = 0; i < subdiv_num; ++i)
 	{
 		float h = ((rand_float() + i) * w) - 1; //[-1, 1]
 
-		N += attenuation(p, h, ua) * gaussian_detector(beta, phi - omega(p, h));
+		N += attenuation(p, h, ua, v_dot_l, cos_theta_t, cos_theta_d) * gaussian_detector(beta, phi - omega(p, h));
 	}
 
 	N *= w;
+
+	return N * 0.5f;
+}
+
+RGBColor HairBcsdf::N_h(int p, float beta, float h, float v_dot_l, float cos_theta_t, float cos_theta_d, float cos_phi)
+{
+	RGBColor ua = RGBColor(0.4, 0.6, 0.1); //absorption
+	float phi = std::acos(cos_phi);
+
+	RGBColor N = 0.0f;
+
+	float dphi = phi - omega(p, h);
+	while (dphi > PI) dphi -= 2 * PI;
+	while (dphi < -PI) dphi += 2 * PI;
+
+	N = attenuation(p, h, ua, v_dot_l, cos_theta_t, cos_theta_d) * trimmed_logistic(dphi, s, -PI, PI);;
 
 	return N * 0.5f;
 }

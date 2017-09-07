@@ -128,7 +128,7 @@ void Pinhole::render_scene(RenderTLS *tls, const World &w, int offsetx, int offs
 					L += w.tracer_ptr->trace_ray(ray, depth);
 				}
 
-			L /= vp.num_samples;
+			L /= (n*n);
 			L *= exposure_time;
 			//w.display_pixel(r, c, L);
 			//if(L.b < 0.1)
